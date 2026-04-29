@@ -15,6 +15,7 @@ import {
   calculateRevenueBreakdown, calculateRevenueFlows, addAdjustment, updateOrder,
   getStoredOrders, getStoredAdjustments, resetStorage,
 } from './mockData';
+import IterationMark from './demo/IterationMark';
 
 const { TabPane } = Tabs;
 
@@ -173,6 +174,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
       </div>
 
       {/* ====== Main Split Layout ====== */}
+      <IterationMark version="2.1" date="04-23" type="modified" label="订单详情 — 分栏布局">
       <div className="od-split-body">
         {/* --- Left Sidebar: Order Info --- */}
         <div className="od-split-left">
@@ -249,6 +251,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
 
         {/* --- Right Main: Accounting Content --- */}
         <div className="od-split-right">
+          <IterationMark version="2.0" date="04-22" type="new" label="收入确认概览">
           {/* Revenue summary card */}
           <div className="od-stats-card">
             <div className="od-stats-head">
@@ -314,12 +317,14 @@ export default function OrderDetailPage({ orderId, onBack }) {
               ))}
             </div>
           </div>
+          </IterationMark>
 
           {/* Main tabs */}
           <Card size="small" className="od-section-card">
             <Tabs activeKey={detailTab} onChange={setDetailTab} size="small" className="od-detail-tabs">
               {/* Tab: Revenue Detail */}
               <TabPane tab={<span><MoneyCollectOutlined /> 收入核算明细</span>} key="revenue-detail">
+                <IterationMark version="2.0" date="04-22" type="new" label="收入核算明细">
                 <Table
                   dataSource={revenueFlows}
                   rowKey="id"
@@ -377,9 +382,11 @@ export default function OrderDetailPage({ orderId, onBack }) {
                     },
                   ]}
                 />
+                </IterationMark>
               </TabPane>
 
               <TabPane tab={<span><HistoryOutlined /> 规则快照</span>} key="snapshot">
+                <IterationMark version="2.0" date="04-22" type="new" label="规则快照">
                 {snapshot ? (
                   <>
                     <div className="snapshot-header">
@@ -434,6 +441,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
                 ) : (
                   <div className="empty-text">暂无规则快照</div>
                 )}
+                </IterationMark>
               </TabPane>
 
               <TabPane tab={<span><CheckCircleOutlined /> 支付/交付记录</span>} key="payment">
@@ -525,6 +533,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
           </Card>
         </div>
       </div>
+      </IterationMark>
 
       {/* ====== Adjust Modal ====== */}
       <Modal
