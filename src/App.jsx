@@ -22,6 +22,11 @@ import {
 import OrderDetailPage from './OrderDetailPage';
 import AdjustmentPage from './AdjustmentPage';
 import './App.css';
+import DemoToggle from './demo/DemoToggle';
+import DocDrawer from './demo/DocDrawer';
+import IterationMark from './demo/IterationMark';
+import { FieldMark, FieldWrap } from './demo/FieldMark';
+import './demo/demo.css';
 
 const { Sider, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -1095,6 +1100,8 @@ export default function App() {
           </Form.Item>
         </Form>
       </Modal>
+      <DemoToggle />
+      <DocDrawer />
     </Layout>
   );
 }
