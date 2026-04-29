@@ -25,7 +25,6 @@ import './App.css';
 import DemoToggle from './demo/DemoToggle';
 import DocDrawer from './demo/DocDrawer';
 import IterationMark from './demo/IterationMark';
-import { FieldMark, FieldWrap } from './demo/FieldMark';
 import './demo/demo.css';
 
 const { Sider, Content } = Layout;
