@@ -4,10 +4,12 @@ import {
 } from 'antd';
 import {
   ArrowLeftOutlined, PlusOutlined, UploadOutlined, UndoOutlined, DeleteOutlined,
-  EditOutlined, CheckCircleOutlined, CloseOutlined, HistoryOutlined,
+  EditOutlined, CheckCircleOutlined, CloseOutlined,
 } from '@ant-design/icons';
 import { getStoredOrders, getStoredAdjustmentOrders, saveAdjustmentOrders, calculateRevenueFlows, ruleVersions } from './mockData';
 import dayjs from 'dayjs';
+import IterationMark from './demo/IterationMark';
+import FieldMark from './demo/FieldMark';
 
 const revenueTypeMap = [
   { key: 'business1', name: '业务收入1', ratioKey: 'business1Ratio', teamKey: 'business1Team', baseType: '业务收入' },
@@ -77,18 +79,6 @@ const approverOptions = [
   { value: '财务主管', label: '财务主管' },
 ];
 
-const iterationChanges = [
-  {
-    version: '2.5',
-    title: '2.5 迭代',
-    date: '2026-04-25',
-    changes: [
-      { key: 'orderRule', label: '订单规则管理模块', type: '新增' },
-      { key: 'adjustmentItems', label: '项目调整的项目选项', type: '修改' },
-    ],
-  },
-];
-
 export default function AdjustmentFormPage({ onBack }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
@@ -103,16 +93,8 @@ export default function AdjustmentFormPage({ onBack }) {
   const [editedRuleItems, setEditedRuleItems] = useState(null);
   const [showAddRuleTypePicker, setShowAddRuleTypePicker] = useState(false);
   const [addRuleType, setAddRuleType] = useState('业务收入');
-  const [selectedIteration, setSelectedIteration] = useState(null);
 
   const selectedAdjustItems = Form.useWatch('adjustmentItems', form) || [];
-  const selectedIterationInfo = iterationChanges.find((item) => item.version === selectedIteration);
-  const isIterationHighlighted = useCallback((key) => (
-    selectedIterationInfo?.changes.some((change) => change.key === key)
-  ), [selectedIterationInfo]);
-  const getIterationHighlightClass = useCallback((key) => (
-    isIterationHighlighted(key) ? `af-iteration-highlight af-iteration-highlight-${key}` : ''
-  ), [isIterationHighlighted]);
 
   const showBizModule = selectedAdjustItems.some(item =>
     ['业务收入', '导流收入', '业务渠道分成'].includes(item)
@@ -897,43 +879,6 @@ export default function AdjustmentFormPage({ onBack }) {
     },
   ];
 
-  const iterationPopoverContent = (
-    <div className="af-iteration-popover">
-      <div className="af-iteration-popover-title">选择迭代号</div>
-      <div className="af-iteration-list">
-        {iterationChanges.map((iteration) => (
-          <button
-            type="button"
-            key={iteration.version}
-            className={`af-iteration-item ${selectedIteration === iteration.version ? 'is-active' : ''}`}
-            onClick={() => setSelectedIteration(iteration.version)}
-          >
-            <span className="af-iteration-item-main">
-              <strong>{iteration.title}</strong>
-              <span>{iteration.date}</span>
-            </span>
-            <span className="af-iteration-count">{iteration.changes.length} 项</span>
-          </button>
-        ))}
-      </div>
-      {selectedIterationInfo && (
-        <div className="af-iteration-detail">
-          {selectedIterationInfo.changes.map((change) => (
-            <div className={`af-iteration-change af-iteration-change-${change.key}`} key={change.key}>
-              <span>{change.type}</span>
-              <strong>{change.label}</strong>
-            </div>
-          ))}
-        </div>
-      )}
-      {selectedIteration && (
-        <Button size="small" block onClick={() => setSelectedIteration(null)}>
-          取消高亮
-        </Button>
-      )}
-    </div>
-  );
-
   return (
     <div className="af-page">
       {contextHolder}
@@ -942,15 +887,6 @@ export default function AdjustmentFormPage({ onBack }) {
       <div className="af-topbar">
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} />
         <span className="af-topbar-title">调整单申请</span>
-        <Popover
-          trigger="click"
-          placement="bottomRight"
-          content={iterationPopoverContent}
-        >
-          <Button className="af-iteration-trigger" icon={<HistoryOutlined />}>
-            {selectedIteration ? `${selectedIteration} 迭代高亮中` : '迭代变更'}
-          </Button>
-        </Popover>
       </div>
 
       {/* Body */}
@@ -973,11 +909,9 @@ export default function AdjustmentFormPage({ onBack }) {
               <Input />
             </Form.Item>
             <Form.Item
-              label="调整项目"
+              label={<FieldMark version="2.5" date="04-25" type="modified">调整项目</FieldMark>}
               name="adjustmentItems"
               rules={[{ required: true }]}
-              className={getIterationHighlightClass('adjustmentItems')}
-              extra={isIterationHighlighted('adjustmentItems') ? <span className="af-iteration-field-tag">2.5 修改</span> : null}
             >
               <Select mode="multiple" placeholder="请选择" options={adjustmentItemOptions} />
             </Form.Item>
@@ -1018,12 +952,10 @@ export default function AdjustmentFormPage({ onBack }) {
 
         {/* Block: 订单规则 */}
         {activeOrder && matchedRule && (
-          <div className={`af-block ${getIterationHighlightClass('orderRule')}`}>
+          <IterationMark version="2.4" date="04-24" type="new" label="订单规则模块" docKey="adjustment-order-rule">
+          <div className="af-block">
             <div className="af-section-title">
               订单规则
-              {isIterationHighlighted('orderRule') && (
-                <span className="af-iteration-section-tag">2.5 新增</span>
-              )}
             </div>
             <div className={`af-rule-panel ${adjustRule ? 'af-rule-panel-editing' : ''}`}>
               <div className="af-rule-header">
@@ -1239,6 +1171,7 @@ export default function AdjustmentFormPage({ onBack }) {
               />
             )}
           </div>
+          </IterationMark>
         )}
 
         {/* Block: 业务信息 */}
