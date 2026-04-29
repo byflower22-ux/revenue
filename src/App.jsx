@@ -473,7 +473,7 @@ export default function App() {
             <>
               {/* Filter Area */}
               <Card className="filter-card" size="small">
-                <IterationMark version="2.0" date="04-22" type="new" label="筛选条件区域">
+                <IterationMark mark="revenue-filter">
                 <Row gutter={[12, 12]} align="middle">
                   <Col span={4}>
                     <Input
@@ -552,7 +552,7 @@ export default function App() {
               </Card>
 
               {/* Main Body: Order List + Detail */}
-              <IterationMark version="2.1" date="04-23" type="new" label="收入核算页（列表+详情）">
+              <IterationMark mark="revenue-list-detail">
               <div className="main-body">
                 {/* Left: Order Table */}
                 <div className={`order-list-panel ${selectedOrder ? 'has-detail' : ''}`}>
@@ -985,7 +985,7 @@ export default function App() {
               </Card>
 
               {/* Order Table */}
-              <IterationMark version="2.5" date="04-25" type="modified" label="订单核算表格（列拆分+筛选优化）" docKey="order-list-optimization">
+              <IterationMark mark="order-accounting-table">
               <Card
                 title={
                   <Space>

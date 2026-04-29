@@ -174,7 +174,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
       </div>
 
       {/* ====== Main Split Layout ====== */}
-      <IterationMark version="2.1" date="04-23" type="modified" label="订单详情 — 分栏布局">
+      <IterationMark mark="detail-split-layout">
       <div className="od-split-body">
         {/* --- Left Sidebar: Order Info --- */}
         <div className="od-split-left">
@@ -251,7 +251,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
 
         {/* --- Right Main: Accounting Content --- */}
         <div className="od-split-right">
-          <IterationMark version="2.0" date="04-22" type="new" label="收入确认概览">
+          <IterationMark mark="detail-revenue-overview">
           {/* Revenue summary card */}
           <div className="od-stats-card">
             <div className="od-stats-head">
@@ -324,7 +324,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
             <Tabs activeKey={detailTab} onChange={setDetailTab} size="small" className="od-detail-tabs">
               {/* Tab: Revenue Detail */}
               <TabPane tab={<span><MoneyCollectOutlined /> 收入核算明细</span>} key="revenue-detail">
-                <IterationMark version="2.0" date="04-22" type="new" label="收入核算明细">
+                <IterationMark mark="detail-revenue-detail">
                 <Table
                   dataSource={revenueFlows}
                   rowKey="id"
@@ -386,7 +386,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
               </TabPane>
 
               <TabPane tab={<span><HistoryOutlined /> 规则快照</span>} key="snapshot">
-                <IterationMark version="2.0" date="04-22" type="new" label="规则快照">
+                <IterationMark mark="detail-rule-snapshot">
                 {snapshot ? (
                   <>
                     <div className="snapshot-header">
