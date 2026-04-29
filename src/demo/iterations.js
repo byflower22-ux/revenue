@@ -22,4 +22,22 @@ export const iterations = {
       flow: null,
     },
   },
+  // 所有标记点集中定义，修改此处即可联动页面标记
+  marks: {
+    // —— 收入核算页 (App.jsx) ——
+    'revenue-filter':           { version: '2.0', type: 'new',      label: '筛选条件区域',                    docKey: null },
+    'revenue-list-detail':      { version: '2.1', type: 'new',      label: '收入核算页（列表+详情）',          docKey: null },
+    // —— 订单核算管理页 (App.jsx) ——
+    'order-accounting-table':   { version: '2.5', type: 'modified', label: '订单核算表格（列拆分+筛选优化）',   docKey: 'order-list-optimization' },
+    // —— 订单详情页 (OrderDetailPage.jsx) ——
+    'detail-split-layout':      { version: '2.1', type: 'modified', label: '订单详情 — 分栏布局',              docKey: null },
+    'detail-revenue-overview':  { version: '2.0', type: 'new',      label: '收入确认概览',                     docKey: null },
+    'detail-revenue-detail':    { version: '2.0', type: 'new',      label: '收入核算明细',                     docKey: null },
+    'detail-rule-snapshot':     { version: '2.0', type: 'new',      label: '规则快照',                         docKey: null },
+    // —— 调整单列表页 (AdjustmentPage.jsx) ——
+    'adjustment-list':          { version: '2.1', type: 'new',      label: '调整单列表页',                     docKey: null },
+    // —— 调整单表单页 (AdjustmentFormPage.jsx) ——
+    'adj-form-order-rule':      { version: '2.4', type: 'new',      label: '订单规则模块',                     docKey: 'adjustment-order-rule' },
+    'adj-form-items':           { version: '2.5', type: 'modified', label: '调整项目',                         docKey: null },
+  },
 };

@@ -1,9 +1,8 @@
 import { Switch, Tag } from 'antd';
 import { useDemo } from './DemoProvider';
-import { iterations } from './iterations';
 
 export default function DemoToggle() {
-  const { demoMode, activeVersion, toggleDemo, filterVersion } = useDemo();
+  const { demoMode, activeVersion, toggleDemo, filterVersion, config } = useDemo();
 
   return (
     <div className="demo-toggle-bar">
@@ -21,7 +20,7 @@ export default function DemoToggle() {
               >
                 全部
               </Tag>
-              {iterations.versions.map(v => (
+              {config.versions.map(v => (
                 <Tag
                   key={v.key}
                   className={`demo-version-tag ${activeVersion === v.key ? 'demo-version-active' : ''}`}

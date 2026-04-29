@@ -25,6 +25,8 @@ import './App.css';
 import DemoToggle from './demo/DemoToggle';
 import DocDrawer from './demo/DocDrawer';
 import IterationMark from './demo/IterationMark';
+import DemoAdminPage from './demo/DemoAdminPage';
+import { useDemo } from './demo/DemoProvider';
 import './demo/demo.css';
 
 const { Sider, Content } = Layout;
@@ -60,6 +62,7 @@ const breadcrumbMap = {
 };
 
 export default function App() {
+  const { demoMode } = useDemo();
   const [selectedMenu, setSelectedMenu] = useState('revenue');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -419,6 +422,7 @@ export default function App() {
         { key: 'adjustment', label: '调整单' },
       ],
     },
+    ...(demoMode ? [{ key: 'demo-admin', icon: <SettingOutlined />, label: '演示配置' }] : []),
   ];
 
   const currentBreadcrumb = breadcrumbMap[selectedMenu] || { parent: '', label: '' };
@@ -1032,8 +1036,11 @@ export default function App() {
             <AdjustmentPage />
           )}
 
+          {/* ====== Demo Admin ====== */}
+          {selectedMenu === 'demo-admin' && <DemoAdminPage />}
+
           {/* ====== Placeholder for other menus ====== */}
-          {!['revenue', 'order-accounting', 'order-detail', 'adjustment'].includes(selectedMenu) && (
+          {!['revenue', 'order-accounting', 'order-detail', 'adjustment', 'demo-admin'].includes(selectedMenu) && (
             <div className="empty-state" style={{ paddingTop: 100 }}>
               <ExclamationCircleOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
               <p style={{ fontSize: 16, color: '#8c8c8c', marginTop: 16 }}>{currentBreadcrumb.label} - 功能开发中</p>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useDemo } from './DemoProvider';
-import { iterations } from './iterations';
 
 const typeConfig = {
   new: { label: '新增', color: '#52c41a' },
@@ -8,25 +7,32 @@ const typeConfig = {
   optimized: { label: '优化', color: '#722ed1' },
 };
 
-export default function IterationMark({ children, version, date, type = 'new', label, docKey }) {
-  const { demoMode, isDimmed } = useDemo();
+export default function IterationMark({ children, mark, version, date, type = 'new', label, docKey }) {
+  const { demoMode, isDimmed, config } = useDemo();
   const [hover, setHover] = useState(false);
+
+  const markData = mark ? config.marks[mark] : null;
+  const v = markData?.version || version;
+  const d = markData ? (config.versions.find(ver => ver.key === markData.version)?.date || date) : date;
+  const t = markData?.type || type;
+  const l = markData?.label || label;
+  const dk = markData?.docKey ?? docKey;
 
   if (!demoMode) return <>{children}</>;
 
-  const dimmed = isDimmed(version);
-  const tc = typeConfig[type] || typeConfig.new;
-  const ver = iterations.versions.find(v => v.key === version);
-  const verLabel = ver ? `${ver.label} (${ver.date})` : `${version}迭代 (${date})`;
+  const dimmed = isDimmed(v);
+  const tc = typeConfig[t] || typeConfig.new;
+  const ver = config.versions.find(ver => ver.key === v);
+  const verLabel = ver ? `${ver.label} (${ver.date})` : `${v}迭代 (${d})`;
 
   const handleClickBadge = (e, action) => {
     e.stopPropagation();
     if (window.__openDocDrawer) {
-      window.__openDocDrawer({ title: label, version, date, type, docKey, tab: action });
+      window.__openDocDrawer({ title: l, version: v, date: d, type: t, docKey: dk, tab: action });
     }
   };
 
-  const doc = docKey ? iterations.docs[docKey] : null;
+  const doc = dk ? config.docs[dk] : null;
 
   return (
     <div

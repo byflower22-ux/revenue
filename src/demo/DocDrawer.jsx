@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Drawer, Tabs, Tag } from 'antd';
 import { useDemo } from './DemoProvider';
-import { iterations } from './iterations';
 
 const typeColors = { new: 'green', modified: 'orange', optimized: 'purple' };
 const typeLabels = { new: '新增', modified: '修改', optimized: '优化' };
 
 export default function DocDrawer() {
-  const { demoMode } = useDemo();
+  const { demoMode, config } = useDemo();
   const [open, setOpen] = useState(false);
   const [info, setInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('doc');
@@ -23,7 +22,7 @@ export default function DocDrawer() {
 
   if (!demoMode || !info) return null;
 
-  const doc = info.docKey ? iterations.docs[info.docKey] : null;
+  const doc = info.docKey ? config.docs[info.docKey] : null;
 
   return (
     <Drawer
