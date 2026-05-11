@@ -105,7 +105,7 @@ export default function AdjustmentPage() {
 
   return (
     <div className="adj-page">
-      <IterationMark mark="adjustment-list">
+      <IterationMark section="整页">
         {contextHolder}
         {/* Filter Area */}
         <Card className="filter-card" size="small">

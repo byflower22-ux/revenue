@@ -174,7 +174,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
       </div>
 
       {/* ====== Main Split Layout ====== */}
-      <IterationMark mark="detail-split-layout">
+      <IterationMark section="整体布局">
       <div className="od-split-body">
         {/* --- Left Sidebar: Order Info --- */}
         <div className="od-split-left">
@@ -251,7 +251,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
 
         {/* --- Right Main: Accounting Content --- */}
         <div className="od-split-right">
-          <IterationMark mark="detail-revenue-overview">
+          <IterationMark section="收入确认概览">
           {/* Revenue summary card */}
           <div className="od-stats-card">
             <div className="od-stats-head">
@@ -324,7 +324,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
             <Tabs activeKey={detailTab} onChange={setDetailTab} size="small" className="od-detail-tabs">
               {/* Tab: Revenue Detail */}
               <TabPane tab={<span><MoneyCollectOutlined /> 收入核算明细</span>} key="revenue-detail">
-                <IterationMark mark="detail-revenue-detail">
+                <IterationMark section="收入核算明细Tab">
                 <Table
                   dataSource={revenueFlows}
                   rowKey="id"
@@ -386,7 +386,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
               </TabPane>
 
               <TabPane tab={<span><HistoryOutlined /> 规则快照</span>} key="snapshot">
-                <IterationMark mark="detail-rule-snapshot">
+                <IterationMark section="规则快照Tab">
                 {snapshot ? (
                   <>
                     <div className="snapshot-header">

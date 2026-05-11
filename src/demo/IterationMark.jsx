@@ -7,18 +7,30 @@ const typeConfig = {
   optimized: { label: '优化', color: '#722ed1' },
 };
 
-export default function IterationMark({ children, mark, version, date, type = 'new', label, docKey }) {
-  const { demoMode, isDimmed, config } = useDemo();
+export default function IterationMark({ children, mark, section, version, date, type = 'new', label, docKey }) {
+  const { demoMode, isDimmed, config, currentPage } = useDemo();
   const [hover, setHover] = useState(false);
 
-  const markData = mark ? config.marks[mark] : null;
+  // Resolve: section-based lookup (only area-level marks without field)
+  let resolvedKey = mark;
+  if (!mark && section && currentPage) {
+    const entry = Object.entries(config.marks).find(
+      ([, m]) => m.page === currentPage && m.section === section && !m.field
+    );
+    if (entry) resolvedKey = entry[0];
+  }
+
+  const markData = resolvedKey ? config.marks[resolvedKey] : null;
+
+  // No mark data and no direct props → render children without marks
+  if (!demoMode) return <>{children}</>;
+  if (!markData && !version) return <>{children}</>;
+
   const v = markData?.version || version;
   const d = markData ? (config.versions.find(ver => ver.key === markData.version)?.date || date) : date;
   const t = markData?.type || type;
   const l = markData?.label || label;
   const dk = markData?.docKey ?? docKey;
-
-  if (!demoMode) return <>{children}</>;
 
   const dimmed = isDimmed(v);
   const tc = typeConfig[t] || typeConfig.new;
@@ -47,6 +59,9 @@ export default function IterationMark({ children, mark, version, date, type = 'n
         <span className="demo-badge" style={{ background: tc.color, color: '#fff' }}>
           {tc.label}
         </span>
+        {l && (
+          <span className="demo-badge demo-badge-label">{l}</span>
+        )}
         {doc && doc.prd && (
           <span className="demo-badge demo-badge-link" onClick={(e) => handleClickBadge(e, 'doc')}>
             📄 PRD

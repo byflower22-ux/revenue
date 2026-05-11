@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>调整单 — 订单规则模块 PRD</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px 24px; color: #333; line-height: 1.7; font-size: 14px; max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; border-bottom: 2px solid #1890ff; padding-bottom: 8px; color: #1890ff; }
+  h2 { font-size: 17px; margin-top: 28px; color: #262626; }
+  h3 { font-size: 15px; margin-top: 20px; color: #595959; }
+  ul, ol { padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  pre { background: #f5f5f5; padding: 12px 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #e8e8e8; padding: 8px 12px; text-align: left; font-size: 13px; }
+  th { background: #fafafa; font-weight: 600; }
+  strong { color: #262626; }
+</style>
+</head>
+<body>
+<h1>调整单申请页 - 订单规则模块 PRD</h1>
+<h2>1. 背景与目标</h2>
+<ul>
+<li><strong>为什么做</strong>：调整单申请时，用户需要对关联订单的收入分配规则进行调整（修改比例、新增收入类型、变更团队归属），并将调整后的规则与下方的业务信息/交付信息模块联动，确保调整项的"项目"选项与规则中的实际收入类型保持一致。</li>
+<li><strong>要达成什么</strong>：实现调整项目选择 → 订单规则调整 → 业务信息/交付信息项目下拉的三方联动，提升调整单申请的准确性和操作效率。</li>
+</ul>
+<h2>2. 用户故事</h2>
+<p>作为 <strong>财务/运营人员</strong>，我希望在创建调整单时能够：</p>
+<ol>
+<li>按基础类型选择调整项目，系统自动显示对应的业务信息或交付信息模块</li>
+<li>开启规则调整后，修改订单收入分配规则的比例和团队归属</li>
+<li>在规则中新增收入类型后，下方模块的"项目"下拉自动包含新增的类型</li>
+<li>不调整规则时，也能选择订单已有的收入类型</li>
+</ol>
+<h2>3. 功能范围</h2>
+<h3>In Scope</h3>
+<ul>
+<li>调整项目选项改为4个基础类型</li>
+<li>订单规则模块的查看与调整（比例、团队、新增/删除收入类型）</li>
+<li>业务信息/交付信息模块的条件显示</li>
+<li>项目下拉与规则模块的三方联动</li>
+<li>已有收入数据按选中类型过滤</li>
+</ul>
+<h3>Out of Scope</h3>
+<ul>
+<li>规则模块的独立管理页面（本期仅在调整单内操作）</li>
+<li>规则生效/失效的历史版本管理</li>
+<li>规则审批流程</li>
+</ul>
+<h2>4. 功能详细说明</h2>
+<h3>4.1 调整项目选项</h3>
+<ul>
+<li><strong>输入</strong>：多选下拉，选项为4个基础类型：业务收入、导流收入、业务渠道分成、交付收入</li>
+<li><strong>处理逻辑</strong>：
+<ul>
+<li>选择"业务收入"/"导流收入"/"业务渠道分成"中任一项 → 下方显示"业务信息"模块</li>
+<li>选择"交付收入" → 下方显示"交付信息"模块</li>
+<li>两者均选中 → 两个模块都显示，业务信息在上，交付信息在下</li>
+<li>均未选择 → 两个模块均隐藏</li>
+</ul>
+</li>
+<li><strong>输出</strong>：已选基础类型列表，用于后续联动</li>
+</ul>
+<h3>4.2 订单规则模块</h3>
+<ul>
+<li><strong>显示条件</strong>：选择关联订单后展示，默认为只读查看模式</li>
+<li><strong>规则摘要区</strong>：展示规则名称、版本、生效状态、收入类型数量、比例合计</li>
+<li><strong>开启调整</strong>：通过开关切换为编辑模式
+<ul>
+<li>可编辑比例（0-100%），实时计算合计是否达到100%</li>
+<li>可编辑团队归属</li>
+<li>可新增收入类型（选择基础类型后自动编号）</li>
+<li>可删除新增的收入类型</li>
+<li>可重置为原始规则</li>
+</ul>
+</li>
+<li><strong>平衡校验</strong>：比例合计 ≠ 100% 时显示警告，不允许提交</li>
+</ul>
+<h3>4.3 业务信息/交付信息模块联动</h3>
+<ul>
+<li><strong>项目下拉数据源</strong>：
+<ul>
+<li>规则调整开启时：从编辑中的规则数据读取</li>
+<li>规则调整关闭时：从订单匹配的原始规则数据读取</li>
+</ul>
+</li>
+<li><strong>业务信息的项目选项</strong>：过滤规则中被选中的类型所包含的收入项</li>
+<li><strong>交付信息的项目选项</strong>：过滤规则中交付收入类型</li>
+<li><strong>已有数据过滤</strong>：仅显示与选中的基础类型匹配的数据</li>
+<li><strong>新增行</strong>：用户手动添加的调整项不受过滤影响</li>
+</ul>
+<h3>4.4 交互流程</h3>
+<pre><code>选择调整项目（4选多）
+    │
+    ├─ 包含业务收入/导流收入/业务渠道分成
+    │       │
+    │       ▼
+    │   显示【业务信息】模块
+    │   项目下拉 ← 规则模块收入类型（过滤匹配）
+    │   已有数据 ← 仅显示选中类型的收入行
+    │
+    ├─ 包含交付收入
+    │       │
+    │       ▼
+    │   显示【交付信息】模块
+    │   项目下拉 ← 规则模块交付收入类型
+    │
+    └─ 规则模块新增收入类型
+            │
+            ▼
+        项目下拉实时更新（无需刷新）</code></pre>
+<h2>5. 数据说明</h2>
+<h3>5.1 基础类型与收入项映射</h3>
+<table>
+<thead><tr><th>基础类型</th><th>默认收入项</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>业务收入</td><td>业务收入1、业务收入2</td><td>可通过规则模块新增业务收入3、4...</td></tr>
+<tr><td>导流收入</td><td>导流收入</td><td>单项</td></tr>
+<tr><td>业务渠道分成</td><td>业务渠道分成</td><td>单项，比例可为负数</td></tr>
+<tr><td>交付收入</td><td>交付收入</td><td>单项</td></tr>
+</tbody>
+</table>
+<h3>5.2 规则数据结构</h3>
+<table>
+<thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>key</td><td>string</td><td>唯一标识</td></tr>
+<tr><td>name</td><td>string</td><td>收入项名称</td></tr>
+<tr><td>baseType</td><td>string</td><td>基础类型</td></tr>
+<tr><td>ratio</td><td>number</td><td>比例（0-1之间）</td></tr>
+<tr><td>team</td><td>string</td><td>团队归属</td></tr>
+<tr><td>isNew</td><td>boolean</td><td>是否为本次新增</td></tr>
+<tr><td>originalRatio</td><td>number</td><td>原始比例（用于对比）</td></tr>
+<tr><td>originalTeam</td><td>string</td><td>原始团队（用于对比）</td></tr>
+</tbody>
+</table>
+<h2>6. 验收标准</h2>
+<ul>
+<li>☑ 调整项目下拉显示4个基础类型选项</li>
+<li>☑ 只选"业务收入"时，仅显示业务信息模块</li>
+<li>☑ 只选"交付收入"时，仅显示交付信息模块</li>
+<li>☑ 同时选业务类型和交付收入时，两个模块都显示</li>
+<li>☑ 未选择调整项目时，两个模块均隐藏</li>
+<li>☑ 规则模块默认只读，开启开关后可编辑</li>
+<li>☑ 规则模块新增"业务收入3"后，项目下拉自动出现该选项</li>
+<li>☑ 规则模块关闭编辑后，项目下拉回退到原始规则</li>
+<li>☑ 比例合计 ≠ 100% 时显示警告提示</li>
+</ul>
+<h2>7. 影响范围</h2>
+<ul>
+<li><strong>前端</strong>：<code>AdjustmentFormPage.jsx</code>（主要改动文件）</li>
+<li><strong>数据</strong>：<code>mockData.js</code> 中的 <code>ruleVersions</code>、<code>revenueTypeMap</code></li>
+<li><strong>不受影响</strong>：调整单列表页、订单核算管理页、订单详情页</li>
+</ul>
+</body>
+</html>

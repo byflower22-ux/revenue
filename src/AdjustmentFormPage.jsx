@@ -909,7 +909,7 @@ export default function AdjustmentFormPage({ onBack }) {
               <Input />
             </Form.Item>
             <Form.Item
-              label={<FieldMark mark="adj-form-items">调整项目</FieldMark>}
+              label={<FieldMark section="基础信息" field="调整项目">调整项目</FieldMark>}
               name="adjustmentItems"
               rules={[{ required: true }]}
             >
@@ -952,7 +952,7 @@ export default function AdjustmentFormPage({ onBack }) {
 
         {/* Block: 订单规则 */}
         {activeOrder && matchedRule && (
-          <IterationMark mark="adj-form-order-rule">
+          <IterationMark section="订单规则模块">
           <div className="af-block">
             <div className="af-section-title">
               订单规则

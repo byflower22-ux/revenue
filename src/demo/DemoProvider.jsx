@@ -7,7 +7,23 @@ const DemoContext = createContext(null);
 function loadConfig() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge page/section from defaults for marks loaded from old localStorage
+      if (parsed.marks) {
+        for (const key of Object.keys(parsed.marks)) {
+          const def = defaultConfig.marks[key];
+          if (def) {
+            if (!parsed.marks[key].page) parsed.marks[key].page = def.page;
+            if (!parsed.marks[key].section) parsed.marks[key].section = def.section;
+            if (def.field && !parsed.marks[key].field) parsed.marks[key].field = def.field;
+            // Migrate old 'adjustment-form' page to 'adjustment'
+            if (parsed.marks[key].page === 'adjustment-form') parsed.marks[key].page = 'adjustment';
+          }
+        }
+      }
+      return parsed;
+    }
   } catch {}
   return null;
 }
@@ -27,6 +43,7 @@ export function useDemo() {
 export function DemoProvider({ children }) {
   const [demoMode, setDemoMode] = useState(true);
   const [activeVersion, setActiveVersion] = useState('all');
+  const [currentPage, setCurrentPage] = useState(null);
   const [config, setConfig] = useState(() => loadConfig() || {
     versions: defaultConfig.versions,
     docs: defaultConfig.docs,
@@ -117,15 +134,15 @@ export function DemoProvider({ children }) {
   }, []);
 
   const value = useMemo(() => ({
-    demoMode, activeVersion, config,
-    toggleDemo, filterVersion, isDimmed,
+    demoMode, activeVersion, currentPage, config,
+    toggleDemo, filterVersion, isDimmed, setCurrentPage,
     addVersion, editVersion, deleteVersion,
     addMark, editMark, deleteMark,
     addDoc, editDoc, deleteDoc,
     resetConfig,
   }), [
-    demoMode, activeVersion, config,
-    toggleDemo, filterVersion, isDimmed,
+    demoMode, activeVersion, currentPage, config,
+    toggleDemo, filterVersion, isDimmed, setCurrentPage,
     addVersion, editVersion, deleteVersion,
     addMark, editMark, deleteMark,
     addDoc, editDoc, deleteDoc,

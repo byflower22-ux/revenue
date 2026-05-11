@@ -6,16 +6,26 @@ const typeConfig = {
   optimized: { label: '优化', icon: '🔧', cssClass: 'demo-field-optimized' },
 };
 
-export default function FieldMark({ children, mark, version, date, type = 'new', docKey }) {
-  const { demoMode, isDimmed, config } = useDemo();
+export default function FieldMark({ children, mark, section, field, version, date, type = 'new', docKey }) {
+  const { demoMode, isDimmed, config, currentPage } = useDemo();
 
-  const markData = mark ? config.marks[mark] : null;
+  let resolvedKey = mark;
+  if (!mark && section && currentPage) {
+    const entry = Object.entries(config.marks).find(
+      ([, m]) => m.page === currentPage && m.section === section && m.field === (field || null)
+    );
+    if (entry) resolvedKey = entry[0];
+  }
+
+  const markData = resolvedKey ? config.marks[resolvedKey] : null;
+
+  if (!demoMode) return <>{children}</>;
+  if (!markData && !version) return <>{children}</>;
+
   const v = markData?.version || version;
   const d = markData ? (config.versions.find(ver => ver.key === markData.version)?.date || date) : date;
   const t = markData?.type || type;
   const dk = markData?.docKey ?? docKey;
-
-  if (!demoMode) return <>{children}</>;
 
   const dimmed = isDimmed(v);
   const tc = typeConfig[t] || typeConfig.new;
@@ -37,14 +47,24 @@ export default function FieldMark({ children, mark, version, date, type = 'new',
   );
 }
 
-export function FieldWrap({ children, mark, version, type = 'new' }) {
-  const { demoMode, isDimmed, config } = useDemo();
+export function FieldWrap({ children, mark, section, field, version, type = 'new' }) {
+  const { demoMode, isDimmed, config, currentPage } = useDemo();
 
-  const markData = mark ? config.marks[mark] : null;
-  const v = markData?.version || version;
-  const t = markData?.type || type;
+  let resolvedKey = mark;
+  if (!mark && section && currentPage) {
+    const entry = Object.entries(config.marks).find(
+      ([, m]) => m.page === currentPage && m.section === section && m.field === (field || null)
+    );
+    if (entry) resolvedKey = entry[0];
+  }
+
+  const markData = resolvedKey ? config.marks[resolvedKey] : null;
 
   if (!demoMode) return <>{children}</>;
+  if (!markData && !version) return <>{children}</>;
+
+  const v = markData?.version || version;
+  const t = markData?.type || type;
 
   const dimmed = isDimmed(v);
   const tc = typeConfig[t] || typeConfig.new;

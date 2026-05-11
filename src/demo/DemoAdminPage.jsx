@@ -6,21 +6,14 @@ import {
   PlusOutlined, EditOutlined, DeleteOutlined, UndoOutlined, CopyOutlined,
 } from '@ant-design/icons';
 import { useDemo } from './DemoProvider';
+import { pageMap, pageSections } from './iterations';
 
 const { Title, Paragraph } = Typography;
 
-const TYPE_COLORS = {
-  new: 'green',
-  modified: 'orange',
-  optimized: 'purple',
-};
-const TYPE_LABELS = {
-  new: '新增',
-  modified: '修改',
-  optimized: '优化',
-};
+const TYPE_COLORS = { new: 'green', modified: 'orange', optimized: 'purple' };
+const TYPE_LABELS = { new: '新增', modified: '修改', optimized: '优化' };
 
-export default function DemoAdminPage() {
+export default function DemoAdminPage({ onNavigate }) {
   const {
     config, addVersion, editVersion, deleteVersion,
     addMark, editMark, deleteMark,
@@ -39,6 +32,24 @@ export default function DemoAdminPage() {
   const [versionForm] = Form.useForm();
   const [markForm] = Form.useForm();
   const [docForm] = Form.useForm();
+
+  const [markPageFilter, setMarkPageFilter] = useState(null);
+
+  // Cascading section / field options for mark form
+  const watchedPage = Form.useWatch('page', markForm);
+  const watchedSection = Form.useWatch('section', markForm);
+
+  const sectionOptions = (watchedPage && pageSections[watchedPage])
+    ? pageSections[watchedPage].map(s => ({ value: s.key, label: s.key }))
+    : [];
+
+  const currentSectionDef = (watchedPage && watchedSection && pageSections[watchedPage])
+    ? pageSections[watchedPage].find(s => s.key === watchedSection)
+    : null;
+
+  const fieldOptions = currentSectionDef?.fields?.length
+    ? currentSectionDef.fields.map(f => ({ value: f, label: f }))
+    : [];
 
   // ── Version CRUD ──
   const handleAddVersion = useCallback(() => {
@@ -141,32 +152,17 @@ export default function DemoAdminPage() {
   // ── Export ──
   const handleExport = useCallback(() => {
     const versions = config.versions.map(v => `    { key: '${v.key}', label: '${v.label}', date: '${v.date}' }`).join(',\n');
-    const docKeys = Object.keys(config.docs);
-    const docsEntries = docKeys.map(k => {
+    const docsEntries = Object.keys(config.docs).map(k => {
       const d = config.docs[k];
-      const prd = d.prd ? `'${d.prd}'` : 'null';
-      const flow = d.flow ? `'${d.flow}'` : 'null';
-      return `    '${k}': {\n      title: '${d.title}',\n      prd: ${prd},\n      flow: ${flow},\n    }`;
+      return `    '${k}': { title: '${d.title}', prd: ${d.prd ? `'${d.prd}'` : 'null'}, flow: ${d.flow ? `'${d.flow}'` : 'null'} }`;
     }).join(',\n');
-    const markKeys = Object.keys(config.marks);
-    const marksEntries = markKeys.map(k => {
+    const marksEntries = Object.keys(config.marks).map(k => {
       const m = config.marks[k];
-      const docKey = m.docKey ? `'${m.docKey}'` : 'null';
-      return `    '${k}': { version: '${m.version}', type: '${m.type}',      label: '${m.label}', docKey: ${docKey} }`;
+      const field = m.field ? `field: '${m.field}', ` : '';
+      return `    '${k}': { page: '${m.page}', section: '${m.section}', ${field}version: '${m.version}', type: '${m.type}', label: '${m.label}', docKey: ${m.docKey ? `'${m.docKey}'` : 'null'} }`;
     }).join(',\n');
 
-    const code = `export const iterations = {
-  versions: [
-${versions},
-  ],
-  docs: {
-${docsEntries},
-  },
-  marks: {
-${marksEntries},
-  },
-};
-`;
+    const code = `export const iterations = {\n  versions: [\n${versions},\n  ],\n  docs: {\n${docsEntries},\n  },\n  marks: {\n${marksEntries},\n  },\n};\n`;
     navigator.clipboard.writeText(code).then(() => {
       message.success('代码已复制到剪贴板');
     }).catch(() => {
@@ -176,14 +172,10 @@ ${marksEntries},
 
   // ── Table data ──
   const versionDataSource = config.versions.map(v => ({ ...v }));
-  const markDataSource = Object.entries(config.marks).map(([key, m]) => ({
-    key,
-    ...m,
-  }));
-  const docDataSource = Object.entries(config.docs).map(([key, d]) => ({
-    key,
-    ...d,
-  }));
+  const markDataSource = Object.entries(config.marks)
+    .filter(([, m]) => !markPageFilter || m.page === markPageFilter)
+    .map(([key, m]) => ({ key, ...m }));
+  const docDataSource = Object.entries(config.docs).map(([key, d]) => ({ key, ...d }));
 
   // ── Version table columns ──
   const versionColumns = [
@@ -191,23 +183,12 @@ ${marksEntries},
     { title: '名称', dataIndex: 'label', key: 'label' },
     { title: '日期', dataIndex: 'date', key: 'date', width: 100 },
     {
-      title: '操作',
-      key: 'action',
-      width: 150,
+      title: '操作', key: 'action', width: 150,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditVersion(record)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title="确认删除该版本？"
-            onConfirm={() => handleDeleteVersion(record.key)}
-            okText="删除"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
-            </Button>
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditVersion(record)}>编辑</Button>
+          <Popconfirm title="确认删除该版本？" onConfirm={() => handleDeleteVersion(record.key)} okText="删除" cancelText="取消">
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -216,32 +197,30 @@ ${marksEntries},
 
   // ── Mark table columns ──
   const markColumns = [
-    { title: 'key', dataIndex: 'key', key: 'key', width: 180 },
+    { title: 'key', dataIndex: 'key', key: 'key', width: 160 },
     {
-      title: '版本',
-      dataIndex: 'version',
-      key: 'version',
-      width: 120,
+      title: '所属页面', dataIndex: 'page', key: 'page', width: 120,
+      render: (page) => page ? <Tag color="blue">{pageMap[page] || page}</Tag> : '-',
+    },
+    { title: '区域', dataIndex: 'section', key: 'section', width: 130 },
+    {
+      title: '字段', dataIndex: 'field', key: 'field', width: 100,
+      render: (val) => val ? <Tag color="geekblue">{val}</Tag> : <span style={{ color: '#bbb' }}>整个区域</span>,
+    },
+    {
+      title: '版本', dataIndex: 'version', key: 'version', width: 110,
       render: (ver) => {
         const found = config.versions.find(v => v.key === ver);
         return <Tag>{found ? found.label : ver}</Tag>;
       },
     },
     {
-      title: '类型',
-      dataIndex: 'type',
-      key: 'type',
-      width: 100,
-      render: (type) => (
-        <Tag color={TYPE_COLORS[type]}>{TYPE_LABELS[type] || type}</Tag>
-      ),
+      title: '类型', dataIndex: 'type', key: 'type', width: 80,
+      render: (type) => <Tag color={TYPE_COLORS[type]}>{TYPE_LABELS[type] || type}</Tag>,
     },
     { title: '标签', dataIndex: 'label', key: 'label' },
     {
-      title: '关联文档',
-      dataIndex: 'docKey',
-      key: 'docKey',
-      width: 200,
+      title: '关联文档', dataIndex: 'docKey', key: 'docKey', width: 180,
       render: (docKey) => {
         if (!docKey) return '-';
         const doc = config.docs[docKey];
@@ -249,23 +228,15 @@ ${marksEntries},
       },
     },
     {
-      title: '操作',
-      key: 'action',
-      width: 150,
+      title: '操作', key: 'action', width: 200,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditMark(record.key, record)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title="确认删除该标记？"
-            onConfirm={() => handleDeleteMark(record.key)}
-            okText="删除"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
-            </Button>
+          {record.page && onNavigate && (
+            <Button type="link" size="small" onClick={() => onNavigate(record.page)}>查看</Button>
+          )}
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditMark(record.key, record)}>编辑</Button>
+          <Popconfirm title="确认删除该标记？" onConfirm={() => handleDeleteMark(record.key)} okText="删除" cancelText="取消">
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -276,38 +247,15 @@ ${marksEntries},
   const docColumns = [
     { title: 'key', dataIndex: 'key', key: 'key', width: 220 },
     { title: '标题', dataIndex: 'title', key: 'title' },
+    { title: 'PRD路径', dataIndex: 'prd', key: 'prd', width: 260, render: (val) => val || '-' },
+    { title: '流程图路径', dataIndex: 'flow', key: 'flow', width: 260, render: (val) => val || '-' },
     {
-      title: 'PRD路径',
-      dataIndex: 'prd',
-      key: 'prd',
-      width: 260,
-      render: (val) => val || '-',
-    },
-    {
-      title: '流程图路径',
-      dataIndex: 'flow',
-      key: 'flow',
-      width: 260,
-      render: (val) => val || '-',
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: 150,
+      title: '操作', key: 'action', width: 150,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditDoc(record.key, record)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title="确认删除该文档？"
-            onConfirm={() => handleDeleteDoc(record.key)}
-            okText="删除"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
-            </Button>
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditDoc(record.key, record)}>编辑</Button>
+          <Popconfirm title="确认删除该文档？" onConfirm={() => handleDeleteDoc(record.key)} okText="删除" cancelText="取消">
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -316,65 +264,40 @@ ${marksEntries},
 
   const tabItems = [
     {
-      key: 'versions',
-      label: '版本管理',
+      key: 'versions', label: '版本管理',
       children: (
         <>
           <div style={{ marginBottom: 16 }}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddVersion}>
-              新增版本
-            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddVersion}>新增版本</Button>
           </div>
-          <Table
-            size="small"
-            dataSource={versionDataSource}
-            columns={versionColumns}
-            rowKey="key"
-            pagination={false}
-            bordered
-          />
+          <Table size="small" dataSource={versionDataSource} columns={versionColumns} rowKey="key" pagination={false} bordered />
         </>
       ),
     },
     {
-      key: 'marks',
-      label: '标记点管理',
+      key: 'marks', label: '标记点管理',
       children: (
         <>
-          <div style={{ marginBottom: 16 }}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMark}>
-              新增标记
-            </Button>
+          <div style={{ marginBottom: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMark}>新增标记</Button>
+            <Select
+              placeholder="按页面筛选" allowClear style={{ width: 180 }}
+              value={markPageFilter} onChange={setMarkPageFilter}
+              options={Object.entries(pageMap).map(([k, v]) => ({ value: k, label: v }))}
+            />
           </div>
-          <Table
-            size="small"
-            dataSource={markDataSource}
-            columns={markColumns}
-            rowKey="key"
-            pagination={false}
-            bordered
-          />
+          <Table size="small" dataSource={markDataSource} columns={markColumns} rowKey="key" pagination={false} bordered />
         </>
       ),
     },
     {
-      key: 'docs',
-      label: '文档管理',
+      key: 'docs', label: '文档管理',
       children: (
         <>
           <div style={{ marginBottom: 16 }}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddDoc}>
-              新增文档
-            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddDoc}>新增文档</Button>
           </div>
-          <Table
-            size="small"
-            dataSource={docDataSource}
-            columns={docColumns}
-            rowKey="key"
-            pagination={false}
-            bordered
-          />
+          <Table size="small" dataSource={docDataSource} columns={docColumns} rowKey="key" pagination={false} bordered />
         </>
       ),
     },
@@ -392,40 +315,19 @@ ${marksEntries},
 
         <Tabs items={tabItems} />
 
-        <div
-          style={{
-            marginTop: 24,
-            paddingTop: 16,
-            borderTop: '1px solid #f0f0f0',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 12,
-          }}
-        >
-          <Popconfirm
-            title="确认重置？"
-            description="将清除所有自定义配置并恢复为默认值"
-            onConfirm={handleReset}
-            okText="重置"
-            cancelText="取消"
-          >
+        <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #f0f0f0', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          <Popconfirm title="确认重置？" description="将清除所有自定义配置并恢复为默认值" onConfirm={handleReset} okText="重置" cancelText="取消">
             <Button icon={<UndoOutlined />}>重置为默认配置</Button>
           </Popconfirm>
-          <Button type="primary" icon={<CopyOutlined />} onClick={handleExport}>
-            导出为代码
-          </Button>
+          <Button type="primary" icon={<CopyOutlined />} onClick={handleExport}>导出为代码</Button>
         </div>
       </Card>
 
       {/* ── Version Modal ── */}
       <Modal
         title={editingVersion ? '编辑版本' : '新增版本'}
-        open={versionModalOpen}
-        onOk={handleVersionSubmit}
-        onCancel={() => setVersionModalOpen(false)}
-        okText="确定"
-        cancelText="取消"
-        destroyOnClose
+        open={versionModalOpen} onOk={handleVersionSubmit} onCancel={() => setVersionModalOpen(false)}
+        okText="确定" cancelText="取消" destroyOnClose
       >
         <Form form={versionForm} layout="vertical" autoComplete="off">
           <Form.Item name="key" label="版本 Key" rules={[{ required: true, message: '请输入版本 Key' }]}>
@@ -443,16 +345,41 @@ ${marksEntries},
       {/* ── Mark Modal ── */}
       <Modal
         title={editingMark ? '编辑标记' : '新增标记'}
-        open={markModalOpen}
-        onOk={handleMarkSubmit}
-        onCancel={() => setMarkModalOpen(false)}
-        okText="确定"
-        cancelText="取消"
-        destroyOnClose
+        open={markModalOpen} onOk={handleMarkSubmit} onCancel={() => setMarkModalOpen(false)}
+        okText="确定" cancelText="取消" destroyOnClose
       >
-        <Form form={markForm} layout="vertical" autoComplete="off">
+        <Form form={markForm} layout="vertical" autoComplete="off"
+          onValuesChange={(changed) => {
+            if (changed.page) {
+              markForm.setFieldsValue({ section: undefined, field: undefined });
+            }
+            if (changed.section) {
+              markForm.setFieldsValue({ field: undefined });
+            }
+          }}
+        >
           <Form.Item name="key" label="标记 Key" rules={[{ required: true, message: '请输入标记 Key' }]}>
             <Input placeholder="例如 new-feature-mark" disabled={!!editingMark} />
+          </Form.Item>
+          <Form.Item name="page" label="所属页面" rules={[{ required: true, message: '请选择页面' }]}>
+            <Select
+              placeholder="选择所属页面"
+              options={Object.entries(pageMap).map(([k, v]) => ({ value: k, label: v }))}
+            />
+          </Form.Item>
+          <Form.Item name="section" label="区域" rules={[{ required: true, message: '请选择区域' }]}>
+            <Select
+              placeholder="选择区域"
+              options={sectionOptions}
+            />
+          </Form.Item>
+          <Form.Item name="field" label="字段（可选）">
+            <Select
+              placeholder={fieldOptions.length ? '选择具体字段，留空则标记整个区域' : '该区域无细分字段'}
+              options={fieldOptions}
+              allowClear
+              disabled={!fieldOptions.length}
+            />
           </Form.Item>
           <Form.Item name="version" label="版本" rules={[{ required: true, message: '请选择版本' }]}>
             <Select
@@ -486,12 +413,8 @@ ${marksEntries},
       {/* ── Doc Modal ── */}
       <Modal
         title={editingDoc ? '编辑文档' : '新增文档'}
-        open={docModalOpen}
-        onOk={handleDocSubmit}
-        onCancel={() => setDocModalOpen(false)}
-        okText="确定"
-        cancelText="取消"
-        destroyOnClose
+        open={docModalOpen} onOk={handleDocSubmit} onCancel={() => setDocModalOpen(false)}
+        okText="确定" cancelText="取消" destroyOnClose
       >
         <Form form={docForm} layout="vertical" autoComplete="off">
           <Form.Item name="key" label="文档 Key" rules={[{ required: true, message: '请输入文档 Key' }]}>
