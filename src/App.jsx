@@ -1,8 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Layout, Menu, Table, Tabs, Button, Tag, Space, Input, Select, DatePicker,
   Breadcrumb, Card, Descriptions, Timeline, Modal, Form, InputNumber,
-  message, Divider, Badge, Tooltip, Popconfirm, Row, Col, Statistic,
+  message, Divider, Badge, Tooltip, Popconfirm, Row, Col, Statistic, Checkbox,
 } from 'antd';
 import {
   DashboardOutlined, SettingOutlined, AccountBookOutlined,
@@ -11,13 +11,13 @@ import {
   SearchOutlined, ReloadOutlined, ExportOutlined, DownOutlined,
   UpOutlined, HomeOutlined, FolderOutlined, TeamOutlined,
   UnorderedListOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  SyncOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
+  SyncOutlined, ClockCircleOutlined, ExclamationCircleOutlined, DownloadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {
   orders, payments, deliveries, ruleVersions, ruleSnapshots,
-  calculateRevenues, adjustments, addAdjustment,
-  getStoredOrders, getStoredAdjustments,
+  calculateRevenues, calculateRevenueBreakdown, adjustments, addAdjustment,
+  getStoredOrders, getStoredAdjustments, batchUpdateOrderRules,
 } from './mockData';
 import OrderDetailPage from './OrderDetailPage';
 import AdjustmentPage from './AdjustmentPage';
@@ -26,6 +26,7 @@ import DemoToggle from './demo/DemoToggle';
 import DocDrawer from './demo/DocDrawer';
 import IterationMark from './demo/IterationMark';
 import DemoAdminPage from './demo/DemoAdminPage';
+import PageMarkPanel from './demo/PageMarkPanel';
 import { useDemo } from './demo/DemoProvider';
 import './demo/demo.css';
 
@@ -62,12 +63,14 @@ const breadcrumbMap = {
 };
 
 export default function App() {
-  const { demoMode } = useDemo();
+  const { demoMode, setCurrentPage } = useDemo();
   const [selectedMenu, setSelectedMenu] = useState('revenue');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [activeTab, setActiveTab] = useState('business');
   const [detailTab, setDetailTab] = useState('revenue');
+
+  useEffect(() => { setCurrentPage(selectedMenu); }, [selectedMenu, setCurrentPage]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filterCollapsed, setFilterCollapsed] = useState(false);
   const [adjustModalVisible, setAdjustModalVisible] = useState(false);
@@ -89,6 +92,13 @@ export default function App() {
     ruleName: '', ruleId: '', ruleVersion: '',
   });
   const [oaFilterExpanded, setOaFilterExpanded] = useState(false);
+
+  // Batch adjust rules
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [batchAdjustVisible, setBatchAdjustVisible] = useState(false);
+  const [batchTargetRule, setBatchTargetRule] = useState(null);
+  const [batchResultVisible, setBatchResultVisible] = useState(false);
+  const [batchResult, setBatchResult] = useState({ success: [], failed: [] });
 
   // Filtered orders for revenue page
   const filteredOrders = useMemo(() => {
@@ -192,6 +202,31 @@ export default function App() {
     setOaFilters({ orderNo: '', orderType: '', status: '', dateRange: null, buyer: '', product: '', productType: '', buyerSource: '', ruleName: '', ruleId: '', ruleVersion: '' });
   }, []);
 
+  const handleBatchAdjust = useCallback(() => {
+    if (!batchTargetRule || selectedRowKeys.length === 0) return;
+    const result = batchUpdateOrderRules([...selectedRowKeys], batchTargetRule);
+    setBatchResult(result);
+    setBatchAdjustVisible(false);
+    setBatchResultVisible(true);
+    setBatchTargetRule(null);
+    setSelectedRowKeys([]);
+  }, [batchTargetRule, selectedRowKeys]);
+
+  const handleDownloadFailedFile = useCallback(() => {
+    const header = '订单号,原规则版本,目标规则版本,失败原因';
+    const rows = batchResult.failed.map((f) =>
+      `${f.orderNo},${f.oldVersion},${f.newVersion},"${f.reason}"`
+    );
+    const csv = '﻿' + header + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `批量调整失败明细_${dayjs().format('YYYYMMDDHHmmss')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [batchResult]);
+
   const handleAdjust = useCallback((type) => {
     setAdjustType(type);
     adjustForm.resetFields();
@@ -266,6 +301,10 @@ export default function App() {
   ];
 
   // ========== Order Accounting Columns ==========
+  const oaRowSelection = {
+    selectedRowKeys,
+    onChange: (keys) => setSelectedRowKeys(keys),
+  };
   const orderAccountingColumns = [
     { title: '订单号', dataIndex: 'orderNo', key: 'orderNo', width: 160, fixed: 'left' },
     { title: '订单类型', dataIndex: 'orderType', key: 'orderType', width: 100,
@@ -477,7 +516,7 @@ export default function App() {
             <>
               {/* Filter Area */}
               <Card className="filter-card" size="small">
-                <IterationMark mark="revenue-filter">
+                <IterationMark section="筛选条件区域">
                 <Row gutter={[12, 12]} align="middle">
                   <Col span={4}>
                     <Input
@@ -556,7 +595,7 @@ export default function App() {
               </Card>
 
               {/* Main Body: Order List + Detail */}
-              <IterationMark mark="revenue-list-detail">
+              <IterationMark section="订单列表+详情面板">
               <div className="main-body">
                 {/* Left: Order Table */}
                 <div className={`order-list-panel ${selectedOrder ? 'has-detail' : ''}`}>
@@ -989,7 +1028,7 @@ export default function App() {
               </Card>
 
               {/* Order Table */}
-              <IterationMark mark="order-accounting-table">
+              <IterationMark section="核算表格">
               <Card
                 title={
                   <Space>
@@ -1000,6 +1039,19 @@ export default function App() {
                 }
                 extra={
                   <Space>
+                    {selectedRowKeys.length > 0 && (
+                      <span style={{ color: '#1890ff', fontSize: 13 }}>
+                        已选 {selectedRowKeys.length} 项
+                      </span>
+                    )}
+                    <Button
+                      type="primary"
+                      icon={<SwapOutlined />}
+                      disabled={selectedRowKeys.length === 0}
+                      onClick={() => setBatchAdjustVisible(true)}
+                    >
+                      批量调整规则
+                    </Button>
                     <Button icon={<ExportOutlined />}>导出</Button>
                     <Button icon={<ReloadOutlined />}>刷新</Button>
                   </Space>
@@ -1010,6 +1062,7 @@ export default function App() {
                 <Table
                   dataSource={oaFilteredOrders}
                   columns={orderAccountingColumns}
+                  rowSelection={oaRowSelection}
                   rowKey="orderNo"
                   size="middle"
                   scroll={{ x: 5330, y: 600 }}
@@ -1027,6 +1080,145 @@ export default function App() {
             </div>
           )}
 
+          {/* Batch Adjust Rules Modal */}
+          <Modal
+            title="批量调整规则"
+            open={batchAdjustVisible}
+            onCancel={() => { setBatchAdjustVisible(false); setBatchTargetRule(null); }}
+            width={1000}
+            footer={[
+              <Button key="cancel" onClick={() => { setBatchAdjustVisible(false); setBatchTargetRule(null); }}>取消</Button>,
+              <Button key="submit" type="primary" disabled={!batchTargetRule} onClick={handleBatchAdjust}>确认调整</Button>,
+            ]}
+          >
+            {/* Selected orders */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>已选订单（{selectedRowKeys.length}条）</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {selectedRowKeys.map((no) => (
+                  <Tag key={no} closable onClose={() => setSelectedRowKeys(prev => prev.filter(k => k !== no))}>{no}</Tag>
+                ))}
+              </div>
+            </div>
+
+            {/* Rule version select */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>选择目标规则版本</div>
+              <Select
+                style={{ width: '100%' }}
+                placeholder="请选择规则版本"
+                value={batchTargetRule}
+                onChange={(v) => setBatchTargetRule(v)}
+              >
+                {ruleVersions.map((rv) => (
+                  <Select.Option key={rv.version} value={rv.version}>
+                    {rv.name} ({rv.status})
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Rule detail table */}
+            {batchTargetRule && (() => {
+              const rule = ruleVersions.find((rv) => rv.version === batchTargetRule);
+              if (!rule) return null;
+              const r = rule.rules;
+              return (
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>规则详情</div>
+                  <div style={{ border: '1px solid #e8e8e8', borderRadius: 4, overflow: 'auto', maxHeight: 260 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, whiteSpace: 'nowrap' }}>
+                      <thead>
+                        <tr style={{ background: '#fafafa', position: 'sticky', top: 0 }}>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>条件</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>订单类型</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>产品</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>来源</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>业务收入1</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>归属团队</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>业务收入2</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>归属团队</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>导流收入</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>归属团队</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>渠道分成</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>归属团队</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>交付收入</th>
+                          <th style={{ padding: '4px 6px', border: '1px solid #eee' }}>归属团队</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rule.conditions.map((cond, i) => (
+                          <tr key={i}>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'center' }}>{i + 1}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee' }}>{cond.orderType}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee' }}>{cond.product}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee' }}>{cond.source}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'right', color: '#1890ff' }}>{(r.business1Ratio * 100).toFixed(0)}%</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', color: '#666' }}>{r.business1Team}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'right', color: '#1890ff' }}>{(r.business2Ratio * 100).toFixed(0)}%</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', color: '#666' }}>{r.business2Team}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'right', color: '#52c41a' }}>{(r.trafficRatio * 100).toFixed(0)}%</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', color: '#666' }}>{r.trafficTeam}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'right', color: '#fa8c16' }}>{(r.channelRatio * 100).toFixed(0)}%</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', color: '#666' }}>{r.channelTeam}</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', textAlign: 'right', color: '#722ed1' }}>{(r.deliveryRatio * 100).toFixed(0)}%</td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #eee', color: '#666' }}>{r.deliveryTeam}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+          </Modal>
+
+          {/* Batch Adjust Result Modal */}
+          <Modal
+            title="批量调整结果"
+            open={batchResultVisible}
+            onCancel={() => setBatchResultVisible(false)}
+            footer={[
+              <Button key="close" type="primary" onClick={() => setBatchResultVisible(false)}>关闭</Button>,
+            ]}
+            width={700}
+          >
+            <div style={{ background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4, padding: '8px 10px', marginBottom: 10, fontSize: 13 }}>
+              <b>调整完成！</b> 成功 <b style={{ color: '#52c41a' }}>{batchResult.success.length}</b> 条，失败 <b style={{ color: '#ff4d4f' }}>{batchResult.failed.length}</b> 条
+            </div>
+            {batchResult.failed.length > 0 && (
+              <div style={{ background: '#fff2e8', border: '1px solid #ffd591', borderRadius: 4, padding: '8px 10px', marginBottom: 12, fontSize: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>部分订单调整失败：</span>
+                  <a onClick={handleDownloadFailedFile} style={{ color: '#1890ff', cursor: 'pointer' }}>
+                    <DownloadOutlined /> 下载失败文件
+                  </a>
+                </div>
+                <div style={{ marginTop: 4, color: '#999', fontSize: 11 }}>文件包含：订单号、原规则版本、目标规则版本、失败原因</div>
+              </div>
+            )}
+            <Table
+              dataSource={[
+                ...batchResult.success.map((no) => ({ orderNo: no, result: 'success', desc: '' })),
+                ...batchResult.failed.map((f) => ({ orderNo: f.orderNo, result: 'failed', desc: f.reason, oldVersion: f.oldVersion, newVersion: f.newVersion })),
+              ]}
+              columns={[
+                { title: '订单号', dataIndex: 'orderNo', key: 'orderNo', width: 180 },
+                { title: '调整结果', key: 'result', width: 100, render: (_, r) => r.result === 'success'
+                  ? <span style={{ color: '#52c41a', fontWeight: 'bold' }}>✓ 成功</span>
+                  : <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>✗ 失败</span>
+                },
+                { title: '说明', key: 'desc', render: (_, r) => {
+                  if (r.result === 'success') return `${r.oldVersion || ''} → ${batchTargetRule || ''}`;
+                  return <span style={{ color: '#ff4d4f' }}>{r.desc}</span>;
+                }},
+              ]}
+              rowKey="orderNo"
+              size="small"
+              pagination={false}
+            />
+          </Modal>
+
           {selectedMenu === 'order-detail' && selectedOrderId && (
             <OrderDetailPage orderId={selectedOrderId} onBack={handleBackFromDetail} />
           )}
@@ -1037,7 +1229,7 @@ export default function App() {
           )}
 
           {/* ====== Demo Admin ====== */}
-          {selectedMenu === 'demo-admin' && <DemoAdminPage />}
+          {selectedMenu === 'demo-admin' && <DemoAdminPage onNavigate={setSelectedMenu} />}
 
           {/* ====== Placeholder for other menus ====== */}
           {!['revenue', 'order-accounting', 'order-detail', 'adjustment', 'demo-admin'].includes(selectedMenu) && (
@@ -1114,6 +1306,7 @@ export default function App() {
       </Modal>
       <DemoToggle />
       <DocDrawer />
+      <PageMarkPanel />
     </Layout>
   );
 }

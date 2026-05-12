@@ -900,3 +900,119 @@ export function calculateRevenueFlows(order, orderAdjustments = []) {
   flows.sort((a, b) => a.time.localeCompare(b.time));
   return flows;
 }
+
+// ========== 批量调整订单规则 ==========
+export function batchUpdateOrderRules(orderNos, newRuleVersion) {
+  const successList = [];
+  const failedList = [];
+
+  // 1. 找到目标规则
+  const newRule = ruleVersions.find((rv) => rv.version === newRuleVersion);
+  if (!newRule) {
+    // 规则不存在，所有订单标记失败
+    orderNos.forEach((orderNo) => {
+      failedList.push({
+        orderNo,
+        oldVersion: '',
+        newVersion: newRuleVersion,
+        reason: `目标规则版本 ${newRuleVersion} 不存在`,
+      });
+    });
+    return { success: successList, failed: failedList };
+  }
+
+  // 2. 获取订单数据
+  const orders = getStoredOrders();
+
+  // 3. 比例 key 映射
+  const ratioKeys = [
+    { key: 'business1Ratio', name: '业务收入1' },
+    { key: 'business2Ratio', name: '业务收入2' },
+    { key: 'trafficRatio', name: '导流收入' },
+    { key: 'channelRatio', name: '业务渠道分成' },
+    { key: 'deliveryRatio', name: '交付收入' },
+  ];
+
+  // 4. 逐个处理订单
+  orderNos.forEach((orderNo) => {
+    // a. 找到订单
+    const orderIndex = orders.findIndex((o) => o.orderNo === orderNo);
+    if (orderIndex === -1) {
+      failedList.push({
+        orderNo,
+        oldVersion: '',
+        newVersion: newRuleVersion,
+        reason: `订单 ${orderNo} 不存在`,
+      });
+      return;
+    }
+
+    const order = orders[orderIndex];
+
+    // b. 找到旧规则
+    const oldRule = ruleVersions.find((rv) => rv.version === order.matchedRuleVersion);
+    if (!oldRule) {
+      failedList.push({
+        orderNo,
+        oldVersion: order.matchedRuleVersion || '',
+        newVersion: newRuleVersion,
+        reason: `订单当前规则版本 ${order.matchedRuleVersion} 不存在`,
+      });
+      return;
+    }
+
+    // c. 计算 breakdown
+    const breakdown = calculateRevenueBreakdown(order);
+
+    // d. 检查是否所有 item.confirmed === 0（无有效已确认收入，免校验直接通过）
+    const hasAnyConfirmed = breakdown.items.some((item) => item.confirmed !== 0);
+
+    let mismatchReasons = [];
+
+    if (hasAnyConfirmed) {
+      // e. 遍历 5 个比例 key 进行检查
+      ratioKeys.forEach((ratioKey) => {
+        // 通过 item.key 匹配：ratioKey.key 去掉 'Ratio' 后缀即为 item.key
+        const itemKey = ratioKey.key.replace(/Ratio$/, '');
+        const item = breakdown.items.find((i) => i.key === itemKey);
+
+        if (item && item.confirmed !== 0) {
+          const oldRatio = oldRule.rules[ratioKey.key];
+          const newRatio = newRule.rules[ratioKey.key];
+
+          // f. 比较旧规则和新规则的比例
+          if (oldRatio !== newRatio) {
+            // g. 记录不一致原因
+            mismatchReasons.push(
+              `${ratioKey.name}比例不一致: 当前${(oldRatio * 100).toFixed(0)}%, 目标${(newRatio * 100).toFixed(0)}%`
+            );
+          }
+        }
+      });
+    }
+
+    // h. 如果有不一致，加入失败列表
+    if (mismatchReasons.length > 0) {
+      failedList.push({
+        orderNo,
+        oldVersion: order.matchedRuleVersion,
+        newVersion: newRuleVersion,
+        reason: mismatchReasons.join('; '),
+      });
+    } else {
+      // i. 没有不一致，修改订单的 matchedRuleVersion 和 matchedRuleId
+      orders[orderIndex] = {
+        ...orders[orderIndex],
+        matchedRuleVersion: newRuleVersion,
+        matchedRuleId: newRule.id,
+      };
+      successList.push(orderNo);
+    }
+  });
+
+  // 5. 持久化
+  saveOrders(orders);
+
+  // 6. 返回结果
+  return { success: successList, failed: failedList };
+}
