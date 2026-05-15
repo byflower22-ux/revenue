@@ -1,0 +1,305 @@
+<h2>设计方案：交互效果 + 版本筛选</h2>
+<p class="subtitle">包含 hover、点击、筛选等完整交互</p>
+
+<style>
+  .page-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff; padding: 10px 16px; border-radius: 8px;
+    border: 1px solid #e8e8e8; margin-bottom: 20px;
+  }
+  .page-toolbar .left { display: flex; align-items: center; gap: 12px; }
+  .page-toolbar .right { display: flex; align-items: center; gap: 12px; }
+
+  .demo-toggle {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333;
+  }
+  .demo-toggle .switch {
+    width: 40px; height: 22px; background: #52c41a; border-radius: 11px;
+    position: relative; cursor: pointer; transition: background 0.3s;
+  }
+  .demo-toggle .switch::after {
+    content: ''; position: absolute; width: 18px; height: 18px;
+    background: #fff; border-radius: 50%; top: 2px; right: 2px;
+    transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .version-filter {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .version-tag {
+    padding: 3px 10px; border-radius: 12px; font-size: 12px;
+    cursor: pointer; transition: all 0.2s; user-select: none;
+    border: 1px solid #d9d9d9; background: #fff; color: #666;
+  }
+  .version-tag:hover { border-color: #1890ff; color: #1890ff; }
+  .version-tag.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+  .version-tag.all.active { background: #333; border-color: #333; }
+
+  .marked-area {
+    position: relative; border: 2px solid transparent; border-radius: 8px;
+    padding: 16px; transition: all 0.3s; margin-bottom: 16px;
+  }
+  .marked-area:hover { border-color: #91d5ff; background: #f0f8ff; }
+  .marked-area.dimmed { opacity: 0.25; pointer-events: none; }
+
+  .mark-badges {
+    position: absolute; top: -14px; left: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .mark-badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .mark-badge:hover { transform: scale(1.1); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+  .mark-badge.version { background: #1890ff; color: #fff; }
+  .mark-badge.new { background: #52c41a; color: #fff; }
+  .mark-badge.modified { background: #fa8c16; color: #fff; }
+  .mark-badge.optimized { background: #722ed1; color: #fff; }
+  .mark-badge.doc-link {
+    background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff;
+  }
+  .mark-badge.flow-link {
+    background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591;
+  }
+
+  .field-mark {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; color: #1890ff; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .field-mark:hover { color: #40a9ff; transform: scale(1.1); }
+  .field-mark.dimmed { opacity: 0.25; }
+
+  .field-box {
+    display: inline-block; border: 1px solid #d9d9d9; border-radius: 4px;
+    padding: 5px 10px; font-size: 13px; background: #fff;
+    transition: all 0.3s;
+  }
+  .field-box.is-new { border-color: #91d5ff; background: #f0f8ff; }
+  .field-box.is-modified { border-color: #ffd591; background: #fffbe6; }
+  .field-box.dimmed { opacity: 0.25; }
+
+  /* drawer animation */
+  .drawer-overlay {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 420px;
+    background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+    transform: translateX(100%); transition: transform 0.3s ease;
+    z-index: 100; display: flex; flex-direction: column;
+  }
+  .drawer-overlay.open { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .drawer-tabs {
+    display: flex; border-bottom: 1px solid #f0f0f0; padding: 0 20px;
+  }
+  .drawer-tab {
+    padding: 10px 16px; font-size: 13px; color: #999; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .drawer-tab:hover { color: #1890ff; }
+  .drawer-tab.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; }
+  .drawer-body { flex: 1; padding: 20px; overflow: auto; font-size: 13px; color: #666; line-height: 1.8; }
+  .drawer-close { color: #999; cursor: pointer; font-size: 18px; padding: 4px; }
+  .drawer-close:hover { color: #333; }
+
+  .form-row { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+  .form-item { flex: 0 0 180px; }
+  .form-label { font-size: 12px; color: #999; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+
+  .click-hint {
+    margin-top: 16px; padding: 10px 16px; background: #f0f5ff; border-radius: 6px;
+    font-size: 12px; color: #1890ff;
+  }
+</style>
+
+<!-- 顶部工具栏 -->
+<div class="page-toolbar">
+  <div class="left">
+    <div class="demo-toggle">
+      <div class="switch" id="toggleSwitch"></div>
+      <span>演示模式</span>
+    </div>
+    <div style="width: 1px; height: 20px; background: #e8e8e8;"></div>
+    <span style="font-size: 12px; color: #999;">筛选版本：</span>
+    <div class="version-filter" id="versionFilter">
+      <div class="version-tag all active" data-ver="all">全部</div>
+      <div class="version-tag" data-ver="2.0">2.0迭代 (04-22)</div>
+      <div class="version-tag" data-ver="2.1">2.1迭代 (04-23)</div>
+      <div class="version-tag" data-ver="2.4">2.4迭代 (04-24)</div>
+      <div class="version-tag" data-ver="2.5">2.5迭代 (04-25)</div>
+    </div>
+  </div>
+  <div class="right">
+    <span style="font-size: 12px; color: #999;">当前显示 2.0 / 2.1 / 2.4 / 2.5 共 12 处标记</span>
+  </div>
+</div>
+
+<!-- 模拟页面内容 -->
+<div style="background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 20px; position: relative;">
+
+  <!-- 区域标记：筛选条件 2.0新增 -->
+  <div class="marked-area" data-version="2.0">
+    <div class="mark-badges">
+      <span class="mark-badge version" onclick="openDrawer('筛选条件区域', '2.0', '新增')">2.0迭代 (04-22)</span>
+      <span class="mark-badge new">新增</span>
+      <span class="mark-badge doc-link" onclick="openDrawer('筛选条件区域', '2.0', '新增', 'doc')">📄 PRD</span>
+      <span class="mark-badge flow-link" onclick="openDrawer('筛选条件区域', '2.0', '新增', 'flow')">🔀 流程图</span>
+    </div>
+    <div style="background: #fafafa; border-radius: 6px; padding: 12px;">
+      <div style="font-weight: 500; margin-bottom: 8px; color: #333;">筛选条件区域</div>
+      <div class="form-row">
+        <div class="form-item">
+          <div class="form-label">订单编号</div>
+          <div class="field-box">请输入订单编号</div>
+        </div>
+        <div class="form-item">
+          <div class="form-label">团队 <span class="field-mark" data-version="2.0" onclick="openDrawer('团队字段', '2.0', '新增')">✨ 2.0新增</span></div>
+          <div class="field-box is-new">请选择团队</div>
+        </div>
+        <div class="form-item">
+          <div class="form-label">区域 <span class="field-mark" data-version="2.0" onclick="openDrawer('区域字段', '2.0', '新增')">✨ 2.0新增</span></div>
+          <div class="field-box is-new">请选择区域</div>
+        </div>
+        <div class="form-item">
+          <div class="form-label">产品类型</div>
+          <div class="field-box">请选择产品类型</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 区域标记：收入核算列表 2.1新增 -->
+  <div class="marked-area" data-version="2.1">
+    <div class="mark-badges">
+      <span class="mark-badge version" onclick="openDrawer('收入核算列表', '2.1', '新增')">2.1迭代 (04-23)</span>
+      <span class="mark-badge new">新增</span>
+      <span class="mark-badge doc-link" onclick="openDrawer('收入核算列表', '2.1', '新增', 'doc')">📄 PRD</span>
+    </div>
+    <div style="background: #fafafa; border-radius: 6px; padding: 12px;">
+      <div style="font-weight: 500; margin-bottom: 8px; color: #333;">收入核算列表（含详情面板）</div>
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1; background: #e8e8e8; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">订单列表</div>
+        <div style="flex: 1; background: #e8e8e8; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">详情面板</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 字段级标记混合在已有区域中 -->
+  <div style="background: #fafafa; border-radius: 6px; padding: 12px; border: 1px solid #e8e8e8;">
+    <div style="font-weight: 500; margin-bottom: 8px; color: #333;">订单核算管理表格（部分列变动）</div>
+    <div class="form-row">
+      <div class="form-item">
+        <div class="form-label">订单编号</div>
+        <div class="field-box">ORD-001</div>
+      </div>
+      <div class="form-item">
+        <div class="form-label">业务收入1比例 <span class="field-mark" data-version="2.5" onclick="openDrawer('业务收入1比例', '2.5', '新增')">✨ 2.5新增</span></div>
+        <div class="field-box is-new" data-version="2.5">35%</div>
+      </div>
+      <div class="form-item">
+        <div class="form-label">业务收入2比例 <span class="field-mark" data-version="2.5" onclick="openDrawer('业务收入2比例', '2.5', '新增')">✨ 2.5新增</span></div>
+        <div class="field-box is-new" data-version="2.5">10%</div>
+      </div>
+      <div class="form-item">
+        <div class="form-label">待确认收入 <span class="field-mark" data-version="2.5" onclick="openDrawer('待确认收入', '2.5', '新增')">✨ 2.5新增</span></div>
+        <div class="field-box is-new" data-version="2.5">¥12,000</div>
+      </div>
+      <div class="form-item">
+        <div class="form-label">状态 <span class="field-mark" data-version="2.4" onclick="openDrawer('状态字段', '2.4', '修改')">✏️ 2.4修改</span></div>
+        <div class="field-box is-modified" data-version="2.4">已确认</div>
+      </div>
+      <div class="form-item">
+        <div class="form-label">客户名称</div>
+        <div class="field-box">张三</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 侧边抽屉 -->
+<div class="drawer-overlay" id="docDrawer">
+  <div class="drawer-header">
+    <div>
+      <div style="font-size: 16px; font-weight: 600;" id="drawerTitle">调整单模块</div>
+      <div style="margin-top: 6px; display: flex; gap: 6px;" id="drawerBadges">
+        <span class="mark-badge version">2.0迭代 (04-22)</span>
+        <span class="mark-badge new">新增</span>
+      </div>
+    </div>
+    <div class="drawer-close" onclick="closeDrawer()">✕</div>
+  </div>
+  <div class="drawer-tabs">
+    <div class="drawer-tab active" id="tabDoc" onclick="switchTab('doc')">需求文档</div>
+    <div class="drawer-tab" id="tabFlow" onclick="switchTab('flow')">流程图</div>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <h4 style="color: #333; margin: 0 0 12px;">调整单 — 订单规则模块 PRD</h4>
+    <p style="margin: 0 0 8px;"><strong>背景：</strong>调整单需要支持多订单关联和规则编辑</p>
+    <p style="margin: 0 0 8px;"><strong>需求1：</strong>调整项从5个独立类型简化为4个基础类型</p>
+    <p style="margin: 0 0 8px;"><strong>需求2：</strong>订单规则模块支持查看/编辑切换</p>
+    <p style="margin: 0 0 8px;"><strong>需求3：</strong>比例调整、团队调整、新增/删除收入类型</p>
+    <p style="margin: 0 0 8px;"><strong>需求4：</strong>业务/交付信息模块根据调整项条件展示</p>
+    <div style="margin-top: 16px; padding: 10px; background: #f6f8fa; border-radius: 6px;">
+      <div style="color: #999; font-size: 12px;">验收标准</div>
+      <div style="margin-top: 6px; font-size: 12px;">✓ 切换调整项时，关联模块联动正确</div>
+      <div style="font-size: 12px;">✓ 规则编辑时比例总和必须等于100%</div>
+      <div style="font-size: 12px;">✓ 项目下拉数据来源于规则模块</div>
+    </div>
+  </div>
+</div>
+
+<!-- 操作提示 -->
+<div class="click-hint">
+  💡 试试这些交互：<strong>点击版本标签</strong>筛选标记（未匹配的会变淡）| <strong>点击徽章/PRD/流程图</strong>打开侧边抽屉 | <strong>hover区域</strong>高亮边框
+</div>
+
+<script>
+  // 版本筛选
+  const versionFilter = document.getElementById('versionFilter');
+  const allTags = versionFilter.querySelectorAll('.version-tag');
+
+  allTags.forEach(tag => {
+    tag.addEventListener('click', () => {
+      allTags.forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      const ver = tag.dataset.ver;
+
+      document.querySelectorAll('[data-version]').forEach(el => {
+        if (ver === 'all') {
+          el.classList.remove('dimmed');
+        } else {
+          el.classList.toggle('dimmed', el.dataset.version !== ver);
+        }
+      });
+    });
+  });
+
+  // 抽屉
+  function openDrawer(title, version, type, tab) {
+    const drawer = document.getElementById('docDrawer');
+    document.getElementById('drawerTitle').textContent = title;
+    const typeClass = type === '新增' ? 'new' : type === '修改' ? 'modified' : 'optimized';
+    document.getElementById('drawerBadges').innerHTML =
+      `<span class="mark-badge version">${version}迭代 (04-22)</span><span class="mark-badge ${typeClass}">${type}</span>`;
+    drawer.classList.add('open');
+    if (tab) switchTab(tab);
+  }
+
+  function closeDrawer() {
+    document.getElementById('docDrawer').classList.remove('open');
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tabDoc').classList.toggle('active', tab === 'doc');
+    document.getElementById('tabFlow').classList.toggle('active', tab === 'flow');
+    const body = document.getElementById('drawerBody');
+    if (tab === 'flow') {
+      body.innerHTML = '<div style="text-align:center; padding: 40px 0; color: #999;"><div style="font-size: 48px; margin-bottom: 12px;">🔀</div><div style="font-size: 14px;">流程图展示区域</div><div style="font-size: 12px; margin-top: 8px;">加载对应的业务流程图图片</div></div>';
+    } else {
+      body.innerHTML = '<h4 style="color: #333; margin: 0 0 12px;">调整单 — 订单规则模块 PRD</h4><p style="margin: 0 0 8px;"><strong>背景：</strong>调整单需要支持多订单关联和规则编辑</p><p style="margin: 0 0 8px;"><strong>需求1：</strong>调整项从5个独立类型简化为4个基础类型</p><p style="margin: 0 0 8px;"><strong>需求2：</strong>订单规则模块支持查看/编辑切换</p><p style="margin: 0 0 8px;"><strong>需求3：</strong>比例调整、团队调整、新增/删除收入类型</p><p style="margin: 0 0 8px;"><strong>需求4：</strong>业务/交付信息模块根据调整项条件展示</p><div style="margin-top: 16px; padding: 10px; background: #f6f8fa; border-radius: 6px;"><div style="color: #999; font-size: 12px;">验收标准</div><div style="margin-top: 6px; font-size: 12px;">✓ 切换调整项时，关联模块联动正确</div><div style="font-size: 12px;">✓ 规则编辑时比例总和必须等于100%</div><div style="font-size: 12px;">✓ 项目下拉数据来源于规则模块</div></div>';
+    }
+  }
+</script>

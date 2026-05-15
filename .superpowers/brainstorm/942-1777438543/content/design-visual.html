@@ -1,0 +1,129 @@
+<h2>设计方案：标记视觉与交互</h2>
+<p class="subtitle">迭代标记在页面上的呈现方式</p>
+
+<div class="mockup" style="margin-top: 20px;">
+  <div class="mockup-header">区域级标记 — IterationMark</div>
+  <div class="mockup-body" style="padding: 20px;">
+    <div style="position: relative; background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 16px;">
+      <!-- 标记徽章 -->
+      <div style="position: absolute; top: -12px; left: 12px; display: flex; align-items: center; gap: 6px;">
+        <span style="background: #1890ff; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; cursor: pointer;">
+          2.0迭代 (04-22)
+        </span>
+        <span style="background: #52c41a; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px;">
+          新增
+        </span>
+        <span style="background: #e6f7ff; color: #1890ff; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid #91d5ff; cursor: pointer;">
+          📄 PRD
+        </span>
+        <span style="background: #fff7e6; color: #fa8c16; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid #ffd591; cursor: pointer;">
+          🔀 流程图
+        </span>
+      </div>
+      <!-- 模拟内容区域 -->
+      <div style="margin-top: 8px; background: #fafafa; border-radius: 4px; padding: 12px; border: 2px dashed #91d5ff;">
+        <div style="color: #999; font-size: 13px;">被标记的功能区域（如筛选条件、表格列组等）</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top: 16px;">
+  <div class="mockup-header">字段级标记 — FieldMark</div>
+  <div class="mockup-body" style="padding: 20px;">
+    <div style="background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 16px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+        <!-- 已有字段 -->
+        <div style="flex: 0 0 180px;">
+          <div style="font-size: 12px; color: #999; margin-bottom: 4px;">订单编号</div>
+          <div style="border: 1px solid #d9d9d9; border-radius: 4px; padding: 6px 10px; background: #fff; font-size: 13px;">ORD-20260422-001</div>
+        </div>
+        <!-- 新增字段 - 有标记 -->
+        <div style="flex: 0 0 180px; position: relative;">
+          <div style="font-size: 12px; color: #999; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            业务收入1比例
+            <span style="background: #1890ff; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 8px; cursor: pointer; white-space: nowrap;">2.5迭代 ✨</span>
+          </div>
+          <div style="border: 1px solid #91d5ff; border-radius: 4px; padding: 6px 10px; background: #f0f8ff; font-size: 13px;">35%</div>
+        </div>
+        <!-- 修改字段 - 有标记 -->
+        <div style="flex: 0 0 180px; position: relative;">
+          <div style="font-size: 12px; color: #999; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            状态
+            <span style="background: #fa8c16; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 8px; cursor: pointer; white-space: nowrap;">2.4迭代 ✏️</span>
+          </div>
+          <div style="border: 1px solid #ffd591; border-radius: 4px; padding: 6px 10px; background: #fffbe6; font-size: 13px;">已确认</div>
+        </div>
+        <!-- 普通字段 - 无标记 -->
+        <div style="flex: 0 0 180px;">
+          <div style="font-size: 12px; color: #999; margin-bottom: 4px;">客户名称</div>
+          <div style="border: 1px solid #d9d9d9; border-radius: 4px; padding: 6px 10px; background: #fff; font-size: 13px;">张三</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top: 16px;">
+  <div class="mockup-header">标记类型图例</div>
+  <div class="mockup-body" style="padding: 20px;">
+    <div style="display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="background: #52c41a; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px;">新增</span>
+        <span style="color: #666;">该功能/字段是本迭代全新加入的</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="background: #fa8c16; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px;">修改</span>
+        <span style="color: #666;">该功能/字段在原有基础上做了改动</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="background: #1890ff; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px;">优化</span>
+        <span style="color: #666;">交互/体验层面的优化</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top: 16px;">
+  <div class="mockup-header">侧边抽屉 — 点击标记后展示</div>
+  <div class="mockup-body" style="padding: 0;">
+    <div style="display: flex; height: 360px;">
+      <!-- 左侧模拟页面 -->
+      <div style="flex: 1; background: #f5f5f5; padding: 16px; position: relative;">
+        <div style="background: #fff; border-radius: 6px; padding: 12px; opacity: 0.6;">
+          <div style="height: 10px; background: #e8e8e8; border-radius: 4px; width: 60%; margin-bottom: 8px;"></div>
+          <div style="height: 10px; background: #e8e8e8; border-radius: 4px; width: 40%;"></div>
+        </div>
+      </div>
+      <!-- 右侧抽屉 -->
+      <div style="width: 380px; background: #fff; border-left: 1px solid #e8e8e8; display: flex; flex-direction: column;">
+        <div style="padding: 16px; border-bottom: 1px solid #f0f0f0;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 16px; font-weight: 600;">调整单模块</span>
+              <div style="margin-top: 4px; display: flex; gap: 6px;">
+                <span style="background: #1890ff; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 8px;">2.0迭代 (04-22)</span>
+                <span style="background: #52c41a; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 8px;">新增</span>
+              </div>
+            </div>
+            <div style="color: #999; cursor: pointer; font-size: 18px;">✕</div>
+          </div>
+        </div>
+        <div style="flex: 1; overflow: auto; padding: 16px;">
+          <!-- Tab: PRD -->
+          <div style="display: flex; border-bottom: 1px solid #f0f0f0; margin-bottom: 16px;">
+            <div style="padding: 8px 16px; color: #1890ff; border-bottom: 2px solid #1890ff; font-size: 13px; font-weight: 500;">需求文档</div>
+            <div style="padding: 8px 16px; color: #999; font-size: 13px;">流程图</div>
+          </div>
+          <div style="font-size: 13px; color: #666; line-height: 1.8;">
+            <h4 style="color: #333; margin: 0 0 8px;">调整单 — 订单规则模块</h4>
+            <p style="margin: 0 0 8px;">1. 调整项从5个独立类型简化为4个基础类型</p>
+            <p style="margin: 0 0 8px;">2. 订单规则模块支持查看/编辑切换</p>
+            <p style="margin: 0 0 8px;">3. 比例调整、团队调整、新增/删除收入类型</p>
+            <p style="margin: 0;">4. 业务/交付信息模块根据调整项条件展示</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

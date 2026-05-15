@@ -1,0 +1,55 @@
+<h2>设计方案：整体架构</h2>
+<p class="subtitle">演示标记层完全独立于业务代码</p>
+
+<div class="mockup" style="margin-top: 20px;">
+  <div class="mockup-header">文件结构</div>
+  <div class="mockup-body" style="padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.8; color: #333;">
+    <div style="color: #52c41a; font-weight: bold;">src/</div>
+    <div>&nbsp;&nbsp;App.jsx &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 原始代码（不修改）</span></div>
+    <div>&nbsp;&nbsp;OrderDetailPage.jsx &nbsp;<span style="color: #999;">← 原始代码（不修改）</span></div>
+    <div>&nbsp;&nbsp;AdjustmentPage.jsx &nbsp;&nbsp;<span style="color: #999;">← 原始代码（不修改）</span></div>
+    <div>&nbsp;&nbsp;AdjustmentFormPage.jsx <span style="color: #999;">← 原始代码（不修改）</span></div>
+    <div>&nbsp;&nbsp;mockData.js &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 原始代码（不修改）</span></div>
+    <div style="margin-top: 8px; color: #1890ff; font-weight: bold;">&nbsp;&nbsp;demo/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #1890ff;">← 演示标记层（独立目录）</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;DemoProvider.jsx &nbsp;&nbsp;&span style="color: #999;">← 开关状态管理</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;IterationMark.jsx &nbsp;<span style="color: #999;">← 标记包裹组件（区域级）</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;FieldMark.jsx &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 标记包裹组件（字段级）</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;DocDrawer.jsx &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 侧边抽屉（展示PRD+流程图）</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;DemoToggle.jsx &nbsp;&nbsp;&nbsp;<span style="color: #999;">← 右上角开关按钮</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;iterations.js &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 迭代标记配置数据</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← PRD文档和流程图资源</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prd/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 需求文档HTML</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flows/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #999;">← 流程图图片</span></div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top: 16px;">
+  <div class="mockup-header">切换机制</div>
+  <div class="mockup-body" style="padding: 20px;">
+    <div style="display: flex; gap: 24px; font-size: 13px;">
+      <div style="flex: 1;">
+        <h4 style="color: #1890ff; margin-bottom: 12px;">演示模式 ON</h4>
+        <div style="background: #f6f8fa; border-radius: 6px; padding: 12px; line-height: 2;">
+          <div>✓ IterationMark 渲染标记徽章</div>
+          <div>✓ FieldMark 渲染字段标记</div>
+          <div>✓ 点击标记可打开抽屉</div>
+          <div>✓ 右上角显示开关按钮</div>
+        </div>
+      </div>
+      <div style="flex: 1;">
+        <h4 style="color: #999; margin-bottom: 12px;">演示模式 OFF（纯净模式）</h4>
+        <div style="background: #fafafa; border-radius: 6px; padding: 12px; line-height: 2; color: #999;">
+          <div>○ IterationMark → 仅渲染子组件</div>
+          <div>○ FieldMark → 仅渲染子组件</div>
+          <div>○ 无任何额外DOM输出</div>
+          <div>○ 无开关按钮</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 20px; padding: 16px; background: #f6ffed; border-radius: 8px; border-left: 4px solid #52c41a;">
+  <h4 style="margin: 0 0 8px; color: #52c41a;">交付方式</h4>
+  <p style="color: #666; margin: 0; line-height: 1.6;">交付前端时只需从 main.jsx 中移除 <code>DemoProvider</code> 包裹，并删除 <code>src/demo/</code> 整个目录。原始页面组件代码<strong>没有任何改动</strong>，完全可直接复用。</p>
+</div>

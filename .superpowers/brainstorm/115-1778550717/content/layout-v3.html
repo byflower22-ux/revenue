@@ -1,0 +1,116 @@
+<h2>文档中心页面布局 V3</h2>
+<p class="subtitle">两个 Tab 统一为：左侧目录/列表 + 右侧内容预览</p>
+
+<div class="mockup">
+  <div class="mockup-header">需求文档 Tab</div>
+  <div class="mockup-body" style="min-height:400px;">
+    <div style="display:flex; height:100%;">
+      <!-- 左侧迭代列表 -->
+      <div style="width:180px; border-right:1px solid #e8e8e8; padding:16px; flex-shrink:0;">
+        <div style="font-weight:600; margin-bottom:12px; color:#1890ff;">迭代版本</div>
+        <div style="padding:10px 12px; background:#e6f7ff; border-radius:6px; margin-bottom:6px; border-left:3px solid #1890ff; cursor:pointer;">
+          <div style="font-weight:500;">V2.5 迭代</div>
+          <div style="font-size:12px; color:#999;">04-25</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.4 迭代</div>
+          <div style="font-size:12px; color:#999;">04-24</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.1 迭代</div>
+          <div style="font-size:12px; color:#999;">04-23</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.0 迭代</div>
+          <div style="font-size:12px; color:#999;">04-22</div>
+        </div>
+      </div>
+
+      <!-- 右侧主区域 -->
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <!-- 顶部 Tab -->
+        <div style="border-bottom:1px solid #e8e8e8; display:flex;">
+          <div style="padding:12px 24px; color:#1890ff; border-bottom:2px solid #1890ff; font-weight:500; cursor:pointer;">需求文档</div>
+          <div style="padding:12px 24px; color:#999; cursor:pointer;">流程图</div>
+        </div>
+
+        <!-- 左目录 + 右内容 -->
+        <div style="flex:1; display:flex;">
+          <!-- 文档目录 -->
+          <div style="width:220px; border-right:1px solid #e8e8e8; padding:16px; overflow-y:auto;">
+            <div style="font-weight:600; margin-bottom:10px; font-size:13px;">目录</div>
+            <div style="padding:6px 10px; background:#e6f7ff; border-radius:4px; margin-bottom:4px; font-size:13px; color:#1890ff; cursor:pointer;">1. 功能概述</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">2. 业务背景</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">3. 功能需求</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.1 订单规则初始化</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.2 规则编辑与联动</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.3 三方联动机制</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">4. 非功能需求</div>
+          </div>
+          <!-- 文档内容 -->
+          <div style="flex:1; padding:24px; overflow-y:auto;">
+            <h2 style="margin:0 0 16px 0;">调整单 — 订单规则模块 PRD</h2>
+            <h3 style="color:#1890ff;">1. 功能概述</h3>
+            <p style="color:#555; line-height:1.8;">调整单中的订单规则模块支持多订单选择后，对每个订单的核算规则进行查看与编辑...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:16px;">
+  <div class="mockup-header">流程图 Tab</div>
+  <div class="mockup-body" style="min-height:400px;">
+    <div style="display:flex; height:100%;">
+      <!-- 左侧迭代列表（同上） -->
+      <div style="width:180px; border-right:1px solid #e8e8e8; padding:16px; flex-shrink:0;">
+        <div style="font-weight:600; margin-bottom:12px; color:#1890ff;">迭代版本</div>
+        <div style="padding:10px 12px; background:#e6f7ff; border-radius:6px; margin-bottom:6px; border-left:3px solid #1890ff;">
+          <div style="font-weight:500;">V2.5 迭代</div>
+          <div style="font-size:12px; color:#999;">04-25</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px;">
+          <div style="font-weight:500;">V2.4 迭代</div>
+          <div style="font-size:12px; color:#999;">04-24</div>
+        </div>
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <!-- 顶部 Tab -->
+        <div style="border-bottom:1px solid #e8e8e8; display:flex;">
+          <div style="padding:12px 24px; color:#999; cursor:pointer;">需求文档</div>
+          <div style="padding:12px 24px; color:#1890ff; border-bottom:2px solid #1890ff; font-weight:500; cursor:pointer;">流程图</div>
+        </div>
+
+        <!-- 左列表 + 右预览 -->
+        <div style="flex:1; display:flex;">
+          <!-- 流程图列表 -->
+          <div style="width:220px; border-right:1px solid #e8e8e8; padding:16px; overflow-y:auto;">
+            <div style="font-weight:600; margin-bottom:10px; font-size:13px;">流程图列表</div>
+            <div style="padding:10px; background:#e6f7ff; border-radius:6px; margin-bottom:6px; border-left:3px solid #722ed1; cursor:pointer;">
+              <div style="font-weight:500; font-size:13px; color:#722ed1;">订单规则初始化流程</div>
+            </div>
+            <div style="padding:10px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+              <div style="font-weight:500; font-size:13px;">收入生成主流程</div>
+            </div>
+          </div>
+          <!-- 流程图全图预览 -->
+          <div style="flex:1; padding:24px; display:flex; align-items:center; justify-content:center; background:#fafafa; overflow:auto;">
+            <div style="max-width:100%; text-align:center;">
+              <div style="width:100%; height:280px; background:#fff; border:1px solid #e8e8e8; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:14px;">
+                流程图全图预览（可缩放、可拖拽）
+              </div>
+              <div style="margin-top:8px; font-size:13px; color:#999;">
+                <span style="cursor:pointer; color:#1890ff;">放大</span> &nbsp;|&nbsp;
+                <span style="cursor:pointer; color:#1890ff;">缩小</span> &nbsp;|&nbsp;
+                <span style="cursor:pointer; color:#1890ff;">重置</span> &nbsp;|&nbsp;
+                <span style="cursor:pointer; color:#1890ff;">下载</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,175 @@
+<h2>调整申请页 - 模块联动原型</h2>
+<p class="subtitle">点击下方【调整项目】的选项，观察模块和下拉选项的变化</p>
+
+<div class="section">
+  <h3>基础信息 - 调整项目（多选）</h3>
+  <div class="mockup">
+    <div class="mockup-header">调整项目选择区</div>
+    <div class="mockup-body" style="padding:16px">
+      <div class="options" data-multiselect id="adj-items">
+        <div class="option" data-choice="业务收入" onclick="toggleSelect(this); updatePreview()">
+          <div class="letter" style="background:#1890ff">A</div>
+          <div class="content">
+            <h3>业务收入</h3>
+            <p>包含子类型：业务收入1、业务收入2</p>
+          </div>
+        </div>
+        <div class="option" data-choice="导流收入" onclick="toggleSelect(this); updatePreview()">
+          <div class="letter" style="background:#52c41a">B</div>
+          <div class="content">
+            <h3>导流收入</h3>
+            <p>包含子类型：导流收入</p>
+          </div>
+        </div>
+        <div class="option" data-choice="业务渠道分成" onclick="toggleSelect(this); updatePreview()">
+          <div class="letter" style="background:#fa8c16">C</div>
+          <div class="content">
+            <h3>业务渠道分成</h3>
+            <p>包含子类型：业务渠道分成</p>
+          </div>
+        </div>
+        <div class="option" data-choice="交付收入" onclick="toggleSelect(this); updatePreview()">
+          <div class="letter" style="background:#722ed1">D</div>
+          <div class="content">
+            <h3>交付收入</h3>
+            <p>包含子类型：交付收入</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="preview-area">
+  <h3>联动效果预览</h3>
+  <p class="subtitle" id="hint-text" style="color:#999">请先在上方选择调整项目...</p>
+
+  <div id="biz-info" style="display:none">
+    <div class="mockup">
+      <div class="mockup-header" style="background:#e6f7ff;border-color:#1890ff">
+        <span style="color:#1890ff">▼ 业务信息</span>
+      </div>
+      <div class="mockup-body" style="padding:16px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#fafafa">
+              <th style="padding:8px;border:1px solid #eee;text-align:left">项目（下拉可选）</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">明细单号</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作类型</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">变化金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">确认金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">归属团队</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:8px;border:1px solid #eee">
+                <select id="biz-project-select" style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee;color:#999">自动生成</td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>增加</option><option>扣减</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <input style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px" placeholder="输入金额">
+              </td>
+              <td style="padding:8px;border:1px solid #eee;color:#999">自动计算</td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>特训营业务组</option><option>导流运营组</option><option>博商管理</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee"><button style="color:#ff4d4f;background:none;border:none;cursor:pointer">删除</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="biz-dropdown-hint" style="margin-top:8px;font-size:12px;color:#1890ff"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="delivery-info" style="display:none;margin-top:16px">
+    <div class="mockup">
+      <div class="mockup-header" style="background:#f9f0ff;border-color:#722ed1">
+        <span style="color:#722ed1">▼ 交付信息</span>
+      </div>
+      <div class="mockup-body" style="padding:16px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#fafafa">
+              <th style="padding:8px;border:1px solid #eee;text-align:left">项目（下拉可选）</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">明细单号</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作类型</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">变化金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">确认金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">归属团队</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>交付收入</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee;color:#999">自动生成</td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>增加</option><option>扣减</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <input style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px" placeholder="输入金额">
+              </td>
+              <td style="padding:8px;border:1px solid #eee;color:#999">自动计算</td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>交付服务组</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee"><button style="color:#ff4d4f;background:none;border:none;cursor:pointer">删除</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top:8px;font-size:12px;color:#722ed1">项目可选：交付收入</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const typeMapping = {
+  '业务收入': ['业务收入1', '业务收入2'],
+  '导流收入': ['导流收入'],
+  '业务渠道分成': ['业务渠道分成'],
+  '交付收入': ['交付收入']
+};
+
+function updatePreview() {
+  const selected = Array.from(document.querySelectorAll('#adj-items .option.selected'))
+    .map(el => el.getAttribute('data-choice'));
+
+  const showBiz = selected.some(s => ['业务收入','导流收入','业务渠道分成'].includes(s));
+  const showDelivery = selected.includes('交付收入');
+
+  document.getElementById('biz-info').style.display = showBiz ? 'block' : 'none';
+  document.getElementById('delivery-info').style.display = showDelivery ? 'block' : 'none';
+
+  document.getElementById('hint-text').style.display = (showBiz || showDelivery) ? 'none' : 'block';
+
+  // Update business info dropdown options
+  if (showBiz) {
+    const bizTypes = selected
+      .filter(s => ['业务收入','导流收入','业务渠道分成'].includes(s))
+      .flatMap(s => typeMapping[s]);
+    const select = document.getElementById('biz-project-select');
+    select.innerHTML = bizTypes.map(t => `<option>${t}</option>`).join('');
+    document.getElementById('biz-dropdown-hint').textContent = `项目可选：${bizTypes.join('、')}（根据上方选择动态变化）`;
+  }
+}
+</script>

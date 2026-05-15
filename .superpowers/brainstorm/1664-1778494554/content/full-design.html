@@ -1,0 +1,129 @@
+<h2>批量调整规则 — 完整设计</h2>
+<p class="subtitle">交互：勾选行+批量按钮 | 规则：选已有版本 | 校验：统一校验+两步弹窗</p>
+
+<div class="section" style="margin-bottom:24px">
+  <h3>1. 列表页改造</h3>
+  <div class="mockup">
+    <div class="mockup-header">订单核算管理列表</div>
+    <div class="mockup-body" style="padding:12px;font-size:13px;line-height:1.6">
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 12px;border-radius:4px">批量调整规则</button>
+        <span style="color:#999;font-size:12px;margin-left:4px">已选 3 项</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tr style="background:#fafafa">
+          <th style="padding:6px;border:1px solid #eee;width:30px">☑</th>
+          <th style="padding:6px;border:1px solid #eee">订单号</th>
+          <th style="padding:6px;border:1px solid #eee">订单类型</th>
+          <th style="padding:6px;border:1px solid #eee">金额</th>
+          <th style="padding:6px;border:1px solid #eee">规则版本</th>
+          <th style="padding:6px;border:1px solid #eee">收入状态</th>
+          <th style="padding:6px;border:1px solid #eee">操作</th>
+        </tr>
+        <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☑</td><td style="padding:6px;border:1px solid #eee">ORD2024010001</td><td style="padding:6px;border:1px solid #eee">产品课程</td><td style="padding:6px;border:1px solid #eee">¥50,000</td><td style="padding:6px;border:1px solid #eee">v1</td><td style="padding:6px;border:1px solid #eee"><span style="color:#52c41a">●</span> 已生成</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+        <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☑</td><td style="padding:6px;border:1px solid #eee">ORD2024010002</td><td style="padding:6px;border:1px solid #eee">合作方交付</td><td style="padding:6px;border:1px solid #eee">¥30,000</td><td style="padding:6px;border #eee">v2</td><td style="padding:6px;border:1px solid #eee"><span style="color:#999">○</span> 未生成</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+        <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☑</td><td style="padding:6px;border:1px solid #eee">ORD2024010003</td><td style="padding:6px;border:1px solid #eee">项目合同</td><td style="padding:6px;border:1px solid #eee">¥80,000</td><td style="padding:6px;border:1px solid #eee">v1</td><td style="padding:6px;border:1px solid #eee"><span style="color:#52c41a">●</span> 已生成</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-bottom:24px">
+  <h3>2. 弹窗第一步：选择规则</h3>
+  <div class="mockup">
+    <div class="mockup-header">批量调整规则（1/2）</div>
+    <div class="mockup-body" style="padding:12px;font-size:13px;line-height:1.8">
+      <div style="margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:4px">已选订单（3条）</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010001</span>
+          <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010002</span>
+          <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010003</span>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:4px">选择目标规则版本</div>
+        <div style="border:1px solid #1890ff;border-radius:4px;padding:6px 10px;font-size:12px;display:flex;justify-content:space-between;background:#e6f7ff">
+          <span>特训营收入分配规则 v3</span>
+          <span style="color:#999">▾</span>
+        </div>
+      </div>
+      <div style="background:#f9f9f9;border-radius:4px;padding:8px;margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:4px;font-size:12px">规则比例详情</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse">
+          <tr style="border-bottom:1px solid #eee"><td style="padding:3px 4px;font-weight:500">收入类型</td><td style="padding:3px 4px;text-align:right;font-weight:500">比例</td></tr>
+          <tr><td style="padding:3px 4px">业务收入1</td><td style="padding:3px 4px;text-align:right">35%</td></tr>
+          <tr><td style="padding:3px 4px">业务收入2</td><td style="padding:3px 4px;text-align:right">10%</td></tr>
+          <tr><td style="padding:3px 4px">导流收入</td><td style="padding:3px 4px;text-align:right">15%</td></tr>
+          <tr><td style="padding:3px 4px">业务渠道分成</td><td style="padding:3px 4px;text-align:right">-15%</td></tr>
+          <tr><td style="padding:3px 4px">交付收入</td><td style="padding:3px 4px;text-align:right">55%</td></tr>
+        </table>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="mock-button" style="padding:4px 16px;border-radius:4px">取消</button>
+        <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 16px;border-radius:4px">下一步：校验</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-bottom:24px">
+  <h3>3. 弹窗第二步：校验结果预览</h3>
+  <div class="mockup">
+    <div class="mockup-header">批量调整规则（2/2）— 校验结果</div>
+    <div class="mockup-body" style="padding:12px;font-size:13px;line-height:1.8">
+      <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px">
+        ✓ 2条订单校验通过，将应用「特训营收入分配规则 v3」
+      </div>
+      <div style="background:#fff2e8;border:1px solid #ffd591;border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:12px">
+        ✗ 1条订单校验不通过，已自动跳过
+      </div>
+      <table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px">
+        <tr style="background:#fafafa">
+          <th style="padding:4px;border:1px solid #eee">订单号</th>
+          <th style="padding:4px;border:1px solid #eee">原规则</th>
+          <th style="padding:4px;border:1px solid #eee">新规则</th>
+          <th style="padding:4px;border:1px solid #eee">校验</th>
+          <th style="padding:4px;border:1px solid #eee">详情</th>
+        </tr>
+        <tr>
+          <td style="padding:4px;border:1px solid #eee">ORD2024010001</td>
+          <td style="padding:4px;border:1px solid #eee">v1</td>
+          <td style="padding:4px;border:1px solid #eee">v3</td>
+          <td style="padding:4px;border:1px solid #eee;color:#52c41a;font-weight:bold">✓ 通过</td>
+          <td style="padding:4px;border:1px solid #eee;color:#999">比例一致</td>
+        </tr>
+        <tr style="background:#fff7e6">
+          <td style="padding:4px;border:1px solid #eee">ORD2024010002</td>
+          <td style="padding:4px;border:1px solid #eee">v2</td>
+          <td style="padding:4px;border:1px solid #eee">v3</td>
+          <td style="padding:4px;border:1px solid #eee;color:#ff4d4f;font-weight:bold">✗ 不通过</td>
+          <td style="padding:4px;border:1px solid #eee;color:#ff4d4f;font-size:10px">业务收入1: 当前50% ≠ 新35%；导流收入: 当前10% ≠ 新15%</td>
+        </tr>
+        <tr>
+          <td style="padding:4px;border:1px solid #eee">ORD2024010003</td>
+          <td style="padding:4px;border:1px solid #eee">v1</td>
+          <td style="4px;border:1px solid #eee">v3</td>
+          <td style="padding:4px;border:1px solid #eee;color:#52c41a;font-weight:bold">✓ 通过</td>
+          <td style="padding:4px;border:1px solid #eee;color:#999">未生成收入，免校验</td>
+        </tr>
+      </table>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="mock-button" style="padding:4px 16px;border-radius:4px">上一步</button>
+        <button class="mock-button" style="padding:4px 16px;border-radius:4px">取消</button>
+        <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 16px;border-radius:4px">确认调整（2条）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 核心校验逻辑</h3>
+  <div style="background:#f9f9f9;border-radius:8px;padding:12px;font-size:13px;line-height:1.8">
+    <p><b>Step 1:</b> 对每条已选订单，获取其 <code>calculateRevenueBreakdown</code> 计算已确认收入</p>
+    <p><b>Step 2:</b> 判断每种收入类型是否有有效数据（confirmedAmount ≠ 0）</p>
+    <p><b>Step 3:</b> 对有有效数据的收入类型，比较当前规则的 ratio 与新规则的 ratio 是否一致</p>
+    <p><b>Step 4:</b> 如果所有有有效数据的类型比例都一致 → 校验通过；否则 → 不通过，列出差异项</p>
+    <p><b>特殊:</b> 订单未生成任何有效收入（所有类型 confirmedAmount = 0）→ 直接通过，免校验</p>
+  </div>
+</div>

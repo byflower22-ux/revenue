@@ -1,0 +1,78 @@
+<h2>批量调整规则弹窗 — UI 方案</h2>
+<p class="subtitle">基于你的选择：勾选行 + 选已有规则 + 跳过不通过 + 统一校验</p>
+
+<div class="options">
+  <div class="option selected" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>单步弹窗：选规则 → 确认 → 自动校验</h3>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">批量调整规则</div>
+        <div class="mockup-body" style="padding:12px;font-size:13px;line-height:1.8">
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;margin-bottom:4px">已选订单（3条）</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010001</span>
+              <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010002</span>
+              <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD2024010003</span>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;margin-bottom:4px">选择新规则版本</div>
+            <div style="border:1px solid #d9d9d9;border-radius:4px;padding:6px 10px;font-size:12px;display:flex;justify-content:space-between">
+              <span>特训营收入分配规则 v3</span>
+              <span style="color:#999">▾</span>
+            </div>
+          </div>
+          <div style="background:#f9f9f9;border-radius:4px;padding:8px;margin-bottom:12px">
+            <div style="font-weight:600;margin-bottom:4px;font-size:12px">规则比例预览</div>
+            <table style="width:100%;font-size:11px;border-collapse:collapse">
+              <tr><td style="padding:2px 4px">业务收入1</td><td style="padding:2px 4px;text-align:right">35%</td></tr>
+              <tr><td style="padding:2px 4px">业务收入2</td><td style="padding:2px 4px;text-align:right">10%</td></tr>
+              <tr><td style="padding:2px 4px">导流收入</td><td style="padding:2px 4px;text-align:right">15%</td></tr>
+              <tr><td style="padding:2px 4px">业务渠道分成</td><td style="padding:2px 4px;text-align:right">-15%</td></tr>
+              <tr><td style="padding:2px 4px">交付收入</td><td style="padding:2px 4px;text-align:right">55%</td></tr>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="mock-button" style="padding:4px 16px;border-radius:4px">取消</button>
+            <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 16px;border-radius:4px">确认调整</button>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;color:#666;font-size:13px">点击确认后执行校验，不通过的自动跳过并在结果中提示。弹窗简洁，一步完成。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>两步弹窗：选规则 → 校验结果预览 → 确认</h3>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">批量调整规则 — 校验结果</div>
+        <div class="mockup-body" style="padding:12px;font-size:13px;line-height:1.8">
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px">
+            ✓ 2条订单校验通过，将应用规则 v3
+          </div>
+          <div style="background:#fff2e8;border:1px solid #ffd591;border-radius:4px;padding:6px 10px;margin-bottom:12px;font-size:12px">
+            ✗ 1条订单校验不通过（已跳过）
+            <div style="margin-top:4px;padding-left:12px;color:#666">
+              ORD2024010002：业务收入1 当前50% ≠ 新规则35%
+            </div>
+          </div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px">
+            <tr style="background:#fafafa"><th style="padding:4px;border:1px solid #eee">订单号</th><th style="padding:4px;border:1px solid #eee">原规则</th><th style="padding:4px;border:1px solid #eee">新规则</th><th style="padding:4px;border:1px solid #eee">校验结果</th></tr>
+            <tr><td style="padding:4px;border:1px solid #eee">ORD2024010001</td><td style="padding:4px;border:1px solid #eee">v1</td><td style="padding:4px;border:1px solid #eee">v3</td><td style="padding:4px;border:1px solid #eee;color:#52c41a">✓ 通过</td></tr>
+            <tr><td style="padding:4px;border:1px solid #eee">ORD2024010002</td><td style="padding:4px;border:1px solid #eee">v2</td><td style="padding:4px;border:1px solid #eee">v3</td><td style="padding:4px;border:1px solid #eee;color:#ff4d4f">✗ 不通过</td></tr>
+            <tr><td style="padding:4px;border:1px solid #eee">ORD2024010003</td><td style="padding:4px;border:1px solid #eee">v1</td><td style="padding:4px;border:1px solid #eee">v3</td><td style="padding:4px;border:1px solid #eee;color:#52c41a">✓ 通过</td></tr>
+          </table>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="mock-button" style="padding:4px 16px;border-radius:4px">取消</button>
+            <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 16px;border-radius:4px">确认调整（2条）</button>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;color:#666;font-size:13px">先展示校验结果预览表，用户确认后才真正执行。可清楚看到每条订单的校验状态和原因。</p>
+    </div>
+  </div>
+</div>
