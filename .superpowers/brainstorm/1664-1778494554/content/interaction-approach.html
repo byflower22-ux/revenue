@@ -1,0 +1,73 @@
+<h2>批量调整规则 — 入口交互方式</h2>
+<p class="subtitle">选择你觉得最合适的交互方案，点击可选中</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>勾选行 + 顶部批量按钮</h3>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-body" style="padding:8px;font-size:13px;line-height:1.6">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">批量调整规则</button>
+            <button class="mock-button" style="padding:4px 12px;border-radius:4px">导出</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <tr style="background:#fafafa"><th style="padding:6px;border:1px solid #eee;width:30px">☐</th><th style="padding:6px;border:1px solid #eee">订单号</th><th style="padding:6px;border:1px solid #eee">订单类型</th><th style="padding:6px;border:1px solid #eee">金额</th><th style="padding:6px;border:1px solid #eee">规则版本</th><th style="padding:6px;border:1px solid #eee">操作</th></tr>
+            <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☑</td><td style="padding:6px;border:1px solid #eee">ORD001</td><td style="padding:6px;border:1px solid #eee">产品课程</td><td style="padding:6px;border:1px solid #eee">¥50,000</td><td style="padding:6px;border:1px solid #eee">v1</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+            <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☑</td><td style="padding:6px;border:1px solid #eee">ORD002</td><td style="padding:6px;border:1px solid #eee">合作方交付</td><td style="padding:6px;border:1px solid #eee">¥30,000</td><td style="padding:6px;border:1px solid #eee">v2</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+            <tr><td style="padding:6px;border:1px solid #eee;text-align:center">☐</td><td style="padding:6px;border:1px solid #eee">ORD003</td><td style="padding:6px;border:1px solid #eee">项目合同</td><td style="padding:6px;border:1px solid #eee">¥80,000</td><td style="padding:6px;border:1px solid #eee">v3</td><td style="padding:6px;border:1px solid #eee;color:#1890ff">查看详情</td></tr>
+          </table>
+          <p style="margin-top:6px;color:#666;font-size:11px">已选 2 项</p>
+        </div>
+      </div>
+      <p style="margin-top:8px;color:#666;font-size:13px">先勾选订单，再点击顶部按钮 → 弹出规则选择弹窗。灵活度高，可精确控制范围。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>按钮点击 → 弹窗选单 + 选规则</h3>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-body" style="padding:8px;font-size:13px;line-height:1.6">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">批量调整规则</button>
+          </div>
+          <div style="background:#fff;border:2px solid #1890ff;border-radius:8px;padding:12px;margin-top:8px;position:relative">
+            <div style="position:absolute;top:-10px;left:16px;background:#1890ff;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">弹窗</div>
+            <p style="font-weight:bold;margin-bottom:8px">第一步：选择订单</p>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD001 ✕</span>
+              <span style="background:#e6f7ff;padding:2px 8px;border-radius:4px;font-size:11px">ORD002 ✕</span>
+            </div>
+            <input class="mock-input" style="width:100%;margin-bottom:8px" placeholder="搜索订单号...">
+            <p style="font-weight:bold;margin:8px 0">第二步：选择新规则</p>
+            <div style="border:1px solid #d9d9d9;border-radius:4px;padding:6px 10px;font-size:12px">特训营收入分配规则 v3 ▾</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;color:#666;font-size:13px">点按钮后弹窗内分步完成：先选订单，再选规则。流程清晰，不占列表空间。</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>按筛选条件全量应用</h3>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-body" style="padding:8px;font-size:13px;line-height:1.6">
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px">
+            当前筛选结果共 <b>12</b> 条订单，将全部应用新规则
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="font-size:12px">订单类型: 产品课程</span>
+            <span style="font-size:12px">规则版本: v1</span>
+          </div>
+          <button class="mock-button" style="background:#1890ff;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer">批量调整规则</button>
+        </div>
+      </div>
+      <p style="margin-top:8px;color:#666;font-size:13px">基于当前筛选条件全量应用。操作简单，但无法精确到单条订单。</p>
+    </div>
+  </div>
+</div>

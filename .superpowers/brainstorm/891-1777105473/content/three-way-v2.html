@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>三方联动原型</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px; max-width: 960px; margin: 0 auto; background: #f5f5f5; }
+h2 { margin-bottom: 8px; }
+h3 { margin: 16px 0 8px; font-size: 15px; }
+.subtitle { color: #888; font-size: 13px; margin-bottom: 16px; }
+
+.option-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.option-card {
+  padding: 12px 18px; border: 2px solid #d9d9d9; border-radius: 8px; cursor: pointer;
+  transition: all 0.2s; background: #fff; user-select: none; min-width: 140px; text-align: center;
+}
+.option-card:hover { border-color: #40a9ff; }
+.option-card.selected { border-color: #1890ff; background: #e6f7ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
+.option-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.option-card .name { font-weight: 500; font-size: 14px; vertical-align: middle; }
+
+.module-box {
+  background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px;
+  border: 1px solid #e8e8e8; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.module-header { font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.module-header .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { padding: 8px; border: 1px solid #eee; background: #fafafa; text-align: left; font-weight: 500; }
+td { padding: 8px; border: 1px solid #eee; }
+
+select, input { padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.hint { margin-top: 8px; font-size: 12px; }
+
+button.action-btn {
+  padding: 4px 12px; background: #1890ff; color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; font-size: 13px;
+}
+button.action-btn:hover { background: #40a9ff; }
+button.danger-btn { color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px; }
+
+.step-label { display: inline-block; background: #1890ff; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px; }
+
+.hidden { display: none !important; }
+
+.empty-state { text-align: center; color: #999; padding: 40px 0; font-size: 14px; }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin: 2px; }
+</style>
+</head>
+<body>
+
+<h2>三方联动原型：调整项目 ↔ 订单规则 ↔ 业务/交付信息</h2>
+<p class="subtitle">模拟完整联动：选择调整项目 → 规则区可新增类型 → 下方下拉实时更新</p>
+
+<!-- Step 1: Adjustment Items -->
+<h3><span class="step-label">Step 1</span>调整项目（多选）</h3>
+<div class="option-grid" id="adj-grid">
+  <div class="option-card" data-type="业务收入" onclick="toggle(this)">
+    <span class="dot" style="background:#1890ff"></span><span class="name">业务收入</span>
+  </div>
+  <div class="option-card" data-type="导流收入" onclick="toggle(this)">
+    <span class="dot" style="background:#52c41a"></span><span class="name">导流收入</span>
+  </div>
+  <div class="option-card" data-type="业务渠道分成" onclick="toggle(this)">
+    <span class="dot" style="background:#fa8c16"></span><span class="name">业务渠道分成</span>
+  </div>
+  <div class="option-card" data-type="交付收入" onclick="toggle(this)">
+    <span class="dot" style="background:#722ed1"></span><span class="name">交付收入</span>
+  </div>
+</div>
+
+<!-- Step 2: Rules -->
+<div id="rule-section" class="hidden">
+  <h3><span class="step-label">Step 2</span>订单规则（可新增收入类型）</h3>
+  <div class="module-box">
+    <table>
+      <thead>
+        <tr><th>收入类型</th><th>基础类型</th><th>比例</th><th>团队</th><th>操作</th></tr>
+      </thead>
+      <tbody id="rule-body"></tbody>
+    </table>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <select id="add-base-type">
+        <option value="业务收入">业务收入</option>
+        <option value="导流收入">导流收入</option>
+        <option value="业务渠道分成">业务渠道分成</option>
+        <option value="交付收入">交付收入</option>
+      </select>
+      <button class="action-btn" onclick="addRuleType()">+ 新增收入类型</button>
+      <span style="font-size:12px;color:#999">新增后下方下拉自动更新</span>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Modules -->
+<div id="modules-section" class="hidden">
+  <h3><span class="step-label">Step 3</span>联动结果</h3>
+
+  <div id="biz-info" class="hidden">
+    <div class="module-box" style="border-left:3px solid #1890ff">
+      <div class="module-header"><span class="dot" style="background:#1890ff"></span> 业务信息</div>
+      <table>
+        <thead><tr><th>项目（动态下拉）</th><th>操作类型</th><th>变化金额</th><th>归属团队</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><select id="biz-select" style="width:100%"></select></td>
+            <td><select><option>增加</option><option>扣减</option></select></td>
+            <td><input placeholder="金额" style="width:100%"></td>
+            <td><select><option>特训营业务组</option><option>博商管理</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="hint" id="biz-hint" style="color:#1890ff"></div>
+    </div>
+  </div>
+
+  <div id="delivery-info" class="hidden">
+    <div class="module-box" style="border-left:3px solid #722ed1">
+      <div class="module-header"><span class="dot" style="background:#722ed1"></span> 交付信息</div>
+      <table>
+        <thead><tr><th>项目（动态下拉）</th><th>操作类型</th><th>变化金额</th><th>归属团队</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><select id="delivery-select" style="width:100%"></select></td>
+            <td><select><option>增加</option><option>扣减</option></select></td>
+            <td><input placeholder="金额" style="width:100%"></td>
+            <td><select><option>交付服务组</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="hint" id="delivery-hint" style="color:#722ed1"></div>
+    </div>
+  </div>
+</div>
+
+<div id="empty-state" class="empty-state">请先在上方选择调整项目</div>
+
+<script>
+const colors = {'业务收入':'#1890ff','导流收入':'#52c41a','业务渠道分成':'#fa8c16','交付收入':'#722ed1'};
+
+let rules = [
+  {name:'业务收入1', base:'业务收入', ratio:35, team:'特训营业务组'},
+  {name:'业务收入2', base:'业务收入', ratio:10, team:'博商管理'},
+  {name:'导流收入', base:'导流收入', ratio:15, team:'导流运营组'},
+  {name:'业务渠道分成', base:'业务渠道分成', ratio:-15, team:'渠道合作组'},
+  {name:'交付收入', base:'交付收入', ratio:55, team:'交付服务组'},
+];
+
+function toggle(el) {
+  el.classList.toggle('selected');
+  refresh();
+}
+
+function addRuleType() {
+  const base = document.getElementById('add-base-type').value;
+  const re = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(\\d*)$');
+  const nums = rules.filter(r => re.test(r.name)).map(r => { const m = r.name.match(re); return m[1] ? parseInt(m[1]) : 1; });
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  rules.push({name: base + next, base, ratio: 0, team: ''});
+  refresh();
+}
+
+function removeRule(name) {
+  rules = rules.filter(r => r.name !== name);
+  refresh();
+}
+
+function getSelected() {
+  return Array.from(document.querySelectorAll('#adj-grid .selected')).map(e => e.dataset.type);
+}
+
+function refresh() {
+  const sel = getSelected();
+  const hasBiz = sel.some(s => ['业务收入','导流收入','业务渠道分成'].includes(s));
+  const hasDel = sel.includes('交付收入');
+
+  document.getElementById('rule-section').classList.toggle('hidden', sel.length === 0);
+  document.getElementById('modules-section').classList.toggle('hidden', !hasBiz && !hasDel);
+  document.getElementById('empty-state').classList.toggle('hidden', sel.length > 0);
+
+  // Rule table
+  const filtered = rules.filter(r => sel.includes(r.base));
+  document.getElementById('rule-body').innerHTML = filtered.map(r => `<tr>
+    <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[r.base]};margin-right:6px"></span>${r.name}</td>
+    <td style="color:#999">${r.base}</td>
+    <td>${r.ratio}%</td>
+    <td>${r.team || '-'}</td>
+    <td><button class="danger-btn" onclick="removeRule('${r.name}')">删除</button></td>
+  </tr>`).join('');
+
+  // Biz info
+  document.getElementById('biz-info').classList.toggle('hidden', !hasBiz);
+  if (hasBiz) {
+    const items = rules.filter(r => ['业务收入','导流收入','业务渠道分成'].includes(r.base) && sel.includes(r.base)).map(r => r.name);
+    document.getElementById('biz-select').innerHTML = items.map(n => `<option>${n}</option>`).join('');
+    document.getElementById('biz-hint').textContent = '项目可选（来自规则模块）：' + items.join('、');
+  }
+
+  // Delivery info
+  document.getElementById('delivery-info').classList.toggle('hidden', !hasDel);
+  if (hasDel) {
+    const items = rules.filter(r => r.base === '交付收入').map(r => r.name);
+    document.getElementById('delivery-select').innerHTML = items.map(n => `<option>${n}</option>`).join('');
+    document.getElementById('delivery-hint').textContent = '项目可选（来自规则模块）：' + items.join('、');
+  }
+}
+</script>
+</body>
+</html>

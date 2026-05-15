@@ -1,0 +1,229 @@
+<h2>三方联动原型：调整项目 ↔ 订单规则 ↔ 业务/交付信息</h2>
+<p class="subtitle">模拟完整联动流程：选择调整项目 → 查看规则 → 新增规则类型 → 观察下方下拉变化</p>
+
+<div class="section">
+  <h3>Step 1：调整项目选择（多选）</h3>
+  <div class="options" data-multiselect id="adj-items">
+    <div class="option" data-choice="业务收入" onclick="toggleSelect(this); updateAll()">
+      <div class="letter" style="background:#1890ff">A</div>
+      <div class="content"><h3>业务收入</h3><p>基础类型</p></div>
+    </div>
+    <div class="option" data-choice="导流收入" onclick="toggleSelect(this); updateAll()">
+      <div class="letter" style="background:#52c41a">B</div>
+      <div class="content"><h3>导流收入</h3><p>基础类型</p></div>
+    </div>
+    <div class="option" data-choice="业务渠道分成" onclick="toggleSelect(this); updateAll()">
+      <div class="letter" style="background:#fa8c16">C</div>
+      <div class="content"><h3>业务渠道分成</h3><p>基础类型</p></div>
+    </div>
+    <div class="option" data-choice="交付收入" onclick="toggleSelect(this); updateAll()">
+      <div class="letter" style="background:#722ed1">D</div>
+      <div class="content"><h3>交付收入</h3><p>基础类型</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="rule-section" style="display:none" class="section">
+  <h3>Step 2：订单规则模块（可新增收入类型）</h3>
+  <div class="mockup">
+    <div class="mockup-header" style="background:#fff7e6;border-color:#fa8c16">规则编辑区</div>
+    <div class="mockup-body" style="padding:16px">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px">
+        <thead>
+          <tr style="background:#fafafa">
+            <th style="padding:8px;border:1px solid #eee;text-align:left">收入类型</th>
+            <th style="padding:8px;border:1px solid #eee;text-align:left">基础类型</th>
+            <th style="padding:8px;border:1px solid #eee;text-align:left">比例</th>
+            <th style="padding:8px;border:1px solid #eee;text-align:left">团队</th>
+            <th style="padding:8px;border:1px solid #eee;text-align:left">操作</th>
+          </tr>
+        </thead>
+        <tbody id="rule-table-body"></tbody>
+      </table>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="addRuleType()" style="padding:4px 12px;background:#1890ff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px">+ 新增收入类型</button>
+        <select id="add-type-select" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">
+          <option value="业务收入">业务收入</option>
+          <option value="导流收入">导流收入</option>
+          <option value="业务渠道分成">业务渠道分成</option>
+          <option value="交付收入">交付收入</option>
+        </select>
+        <span style="font-size:12px;color:#999">选择基础类型后点击新增，下方下拉会自动更新</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modules-section" style="display:none" class="section">
+  <h3>Step 3：联动结果（下方模块）</h3>
+
+  <div id="biz-info">
+    <div class="mockup" style="margin-bottom:16px">
+      <div class="mockup-header" style="background:#e6f7ff;border-color:#1890ff">
+        <span style="color:#1890ff">▼ 业务信息</span>
+      </div>
+      <div class="mockup-body" style="padding:16px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#fafafa">
+              <th style="padding:8px;border:1px solid #eee;text-align:left">项目（动态下拉）</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作类型</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">变化金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">归属团队</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:8px;border:1px solid #eee">
+                <select id="biz-project-select" style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px"></select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>增加</option><option>扣减</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <input style="width:100%;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px" placeholder="金额">
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>特训营业务组</option><option>博商管理</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="biz-hint" style="margin-top:8px;font-size:12px;color:#1890ff"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="delivery-info" style="display:none">
+    <div class="mockup">
+      <div class="mockup-header" style="background:#f9f0ff;border-color:#722ed1">
+        <span style="color:#722ed1">▼ 交付信息</span>
+      </div>
+      <div class="mockup-body" style="padding:16px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#fafafa">
+              <th style="padding:8px;border:1px solid #eee;text-align:left">项目（动态下拉）</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">操作类型</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">变化金额</th>
+              <th style="padding:8px;border:1px solid #eee;text-align:left">归属团队</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:8px;border:1px solid #eee">
+                <select id="delivery-project-select" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px"></select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>增加</option><option>扣减</option>
+                </select>
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <input style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px" placeholder="金额">
+              </td>
+              <td style="padding:8px;border:1px solid #eee">
+                <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px">
+                  <option>交付服务组</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="delivery-hint" style="margin-top:8px;font-size:12px;color:#722ed1"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="empty-hint" class="section">
+  <p class="subtitle" style="text-align:center;color:#999;padding:40px 0">请先在上方选择调整项目</p>
+</div>
+
+<script>
+const colorMap = { '业务收入':'#1890ff', '导流收入':'#52c41a', '业务渠道分成':'#fa8c16', '交付收入':'#722ed1' };
+
+let ruleItems = [
+  { name: '业务收入1', baseType: '业务收入', ratio: 35, team: '特训营业务组' },
+  { name: '业务收入2', baseType: '业务收入', ratio: 10, team: '博商管理' },
+  { name: '导流收入', baseType: '导流收入', ratio: 15, team: '导流运营组' },
+  { name: '业务渠道分成', baseType: '业务渠道分成', ratio: -15, team: '渠道合作组' },
+  { name: '交付收入', baseType: '交付收入', ratio: 55, team: '交付服务组' },
+];
+
+function getSelected() {
+  return Array.from(document.querySelectorAll('#adj-items .option.selected'))
+    .map(el => el.getAttribute('data-choice'));
+}
+
+function addRuleType() {
+  const baseType = document.getElementById('add-type-select').value;
+  const escaped = baseType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`^${escaped}(\\d*)$`);
+  const nums = ruleItems
+    .filter(item => regex.test(item.name))
+    .map(item => { const m = item.name.match(regex); return m[1] ? parseInt(m[1], 10) : 1; });
+  const maxNum = nums.length > 0 ? Math.max(...nums) : 0;
+  const newName = `${baseType}${maxNum + 1}`;
+  ruleItems.push({ name: newName, baseType, ratio: 0, team: '' });
+  updateAll();
+}
+
+function updateAll() {
+  const selected = getSelected();
+  const hasBiz = selected.some(s => ['业务收入','导流收入','业务渠道分成'].includes(s));
+  const hasDelivery = selected.includes('交付收入');
+
+  // Show/hide sections
+  document.getElementById('rule-section').style.display = selected.length > 0 ? 'block' : 'none';
+  document.getElementById('modules-section').style.display = (hasBiz || hasDelivery) ? 'block' : 'none';
+  document.getElementById('empty-hint').style.display = selected.length > 0 ? 'none' : 'block';
+  document.getElementById('biz-info').style.display = hasBiz ? 'block' : 'none';
+  document.getElementById('delivery-info').style.display = hasDelivery ? 'block' : 'none';
+
+  // Rule table - show items matching selected base types
+  const ruleBody = document.getElementById('rule-table-body');
+  const filteredRules = ruleItems.filter(item => selected.includes(item.baseType));
+  ruleBody.innerHTML = filteredRules.map(item => `
+    <tr>
+      <td style="padding:8px;border:1px solid #eee">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colorMap[item.baseType]};margin-right:6px"></span>
+        ${item.name}
+      </td>
+      <td style="padding:8px;border:1px solid #eee;color:#999">${item.baseType}</td>
+      <td style="padding:8px;border:1px solid #eee">${item.ratio}%</td>
+      <td style="padding:8px;border:1px solid #eee">${item.team || '-'}</td>
+      <td style="padding:8px;border:1px solid #eee">
+        <button onclick="removeRuleItem('${item.name}')" style="color:#ff4d4f;background:none;border:none;cursor:pointer;font-size:12px">删除</button>
+      </td>
+    </tr>
+  `).join('');
+
+  // Business info dropdown
+  if (hasBiz) {
+    const bizTypes = ruleItems
+      .filter(item => ['业务收入','导流收入','业务渠道分成'].includes(item.baseType) && selected.includes(item.baseType))
+      .map(item => item.name);
+    const select = document.getElementById('biz-project-select');
+    select.innerHTML = bizTypes.map(t => `<option>${t}</option>`).join('');
+    document.getElementById('biz-hint').textContent = `项目可选（来自规则模块）：${bizTypes.join('、')}`;
+  }
+
+  // Delivery info dropdown
+  if (hasDelivery) {
+    const deliveryTypes = ruleItems.filter(item => item.baseType === '交付收入').map(item => item.name);
+    const select = document.getElementById('delivery-project-select');
+    select.innerHTML = deliveryTypes.map(t => `<option>${t}</option>`).join('');
+    document.getElementById('delivery-hint').textContent = `项目可选（来自规则模块）：${deliveryTypes.join('、')}`;
+  }
+}
+
+function removeRuleItem(name) {
+  ruleItems = ruleItems.filter(item => item.name !== name);
+  updateAll();
+}
+</script>

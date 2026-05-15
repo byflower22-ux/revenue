@@ -1,0 +1,160 @@
+<h2>订单详情页布局方案</h2>
+<p class="subtitle">选择你认为最合适的页面布局结构</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Tab 分组式</h3>
+      <p>顶部固定订单摘要卡片，下方用 Tab 分组展示详细信息</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>垂直堆叠式</h3>
+      <p>所有区块从上到下依次排列，用 Card 分隔，滚动浏览</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>摘要 + Tab 混合式</h3>
+      <p>顶部摘要，中间核心信息卡片，底部 Tab 放流水/快照/调整记录</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 32px;">
+  <div class="split">
+    <!-- 方案 A -->
+    <div class="mockup">
+      <div class="mockup-header">方案 A：Tab 分组式</div>
+      <div class="mockup-body" style="font-size: 12px;">
+        <div class="mock-nav" style="background: #e6f7ff; padding: 8px; margin-bottom: 8px;">
+          ← 返回订单列表 &nbsp;|&nbsp; 订单核算管理 / 订单详情
+        </div>
+        <div style="border: 2px solid #1890ff; border-radius: 8px; padding: 8px; margin-bottom: 8px; background: #fafafa;">
+          <div style="font-weight: bold; margin-bottom: 4px;">📋 订单摘要条</div>
+          <div style="display: flex; gap: 8px; font-size: 11px;">
+            <span>ORD-2024-001</span>
+            <span>| 课程订单</span>
+            <span>| 已完成</span>
+            <span>| ¥2,980</span>
+          </div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 4px; overflow: hidden;">
+          <div style="display: flex; border-bottom: 2px solid #1890ff;">
+            <div style="padding: 6px 10px; background: #1890ff; color: white; font-size: 11px;">基本信息</div>
+            <div style="padding: 6px 10px; font-size: 11px;">买家/产品</div>
+            <div style="padding: 6px 10px; font-size: 11px;">团队/员工</div>
+            <div style="padding: 6px 10px; font-size: 11px;">活动信息</div>
+            <div style="padding: 6px 10px; font-size: 11px;">收入明细</div>
+            <div style="padding: 6px 10px; font-size: 11px;">规则快照</div>
+            <div style="padding: 6px 10px; font-size: 11px;">支付/交付</div>
+            <div style="padding: 6px 10px; font-size: 11px;">调整记录</div>
+          </div>
+          <div style="padding: 16px; background: white; min-height: 80px;">
+            <div style="color: #999;">当前 Tab 的内容区域</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 方案 B -->
+    <div class="mockup">
+      <div class="mockup-header">方案 B：垂直堆叠式</div>
+      <div class="mockup-body" style="font-size: 12px;">
+        <div class="mock-nav" style="background: #e6f7ff; padding: 8px; margin-bottom: 8px;">
+          ← 返回订单列表 &nbsp;|&nbsp; 订单核算管理 / 订单详情
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">📋 订单基本信息</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 4px; font-size: 10px; color: #666;">
+            <span>订单号: ORD-001</span><span>类型: 课程</span>
+            <span>状态: 已完成</span><span>金额: ¥2,980</span>
+          </div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">👤 买家/产品信息</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">👥 团队/员工信息</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">🎉 活动信息</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fff7e6;">
+          <div style="font-weight: bold; font-size: 11px;">💰 收入分摊明细</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">📐 规则快照</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; margin-bottom: 6px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">💳 支付/交付记录</div>
+        </div>
+        <div style="border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #fafafa;">
+          <div style="font-weight: bold; font-size: 11px;">📝 调整记录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方案 C 单独放下面 -->
+  <div class="mockup" style="margin-top: 16px;">
+    <div class="mockup-header">方案 C：摘要 + Tab 混合式</div>
+    <div class="mockup-body" style="font-size: 12px;">
+      <div class="mock-nav" style="background: #e6f7ff; padding: 8px; margin-bottom: 8px;">
+        ← 返回订单列表 &nbsp;|&nbsp; 订单核算管理 / 订单详情
+      </div>
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <div style="flex: 1; border: 2px solid #1890ff; border-radius: 8px; padding: 8px; background: #fafafa;">
+          <div style="font-weight: bold; margin-bottom: 4px; font-size: 11px;">📋 订单摘要</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10px; color: #666;">
+            <span>订单号: ORD-001</span><span>类型: 课程订单</span>
+            <span>状态: 已完成</span><span>金额: ¥2,980</span>
+          </div>
+        </div>
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #fafafa;">
+          <div style="font-weight: bold; margin-bottom: 4px; font-size: 11px;">👤 买家/产品</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10px; color: #666;">
+            <span>买家: 张三</span><span>产品: 高级课程</span>
+            <span>来源: 线上</span><span>归属: 教育部</span>
+          </div>
+        </div>
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #fafafa;">
+          <div style="font-weight: bold; margin-bottom: 4px; font-size: 11px;">👥 团队/员工</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10px; color: #666;">
+            <span>团队: A团队</span><span>区域: 华东</span>
+            <span>员工: 李四</span><span>部门: 销售</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #fff7e6;">
+          <div style="font-weight: bold; font-size: 11px;">💰 业务收入: ¥1,200</div>
+        </div>
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #f6ffed;">
+          <div style="font-weight: bold; font-size: 11px;">💰 导流收入: ¥600</div>
+        </div>
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #e6fffb;">
+          <div style="font-weight: bold; font-size: 11px;">💰 交付收入: ¥800</div>
+        </div>
+        <div style="flex: 1; border: 1px solid #d9d9d9; border-radius: 8px; padding: 8px; background: #fff0f6;">
+          <div style="font-weight: bold; font-size: 11px;">💰 渠道分成: ¥380</div>
+        </div>
+      </div>
+      <div style="border: 1px solid #d9d9d9; border-radius: 4px; overflow: hidden;">
+        <div style="display: flex; border-bottom: 2px solid #1890ff;">
+          <div style="padding: 6px 10px; background: #1890ff; color: white; font-size: 11px;">🎉 活动信息</div>
+          <div style="padding: 6px 10px; font-size: 11px;">规则快照</div>
+          <div style="padding: 6px 10px; font-size: 11px;">支付/交付</div>
+          <div style="padding: 6px 10px; font-size: 11px;">调整记录</div>
+        </div>
+        <div style="padding: 16px; background: white; min-height: 60px;">
+          <div style="color: #999;">Tab 内容区域</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

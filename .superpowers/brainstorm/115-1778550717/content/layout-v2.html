@@ -1,0 +1,95 @@
+<h2>文档中心页面布局 V2</h2>
+<p class="subtitle">简化层级，右侧顶部 Tab 切换，内容直接展示</p>
+
+<div class="mockup">
+  <div class="mockup-header">文档中心页面</div>
+  <div class="mockup-body" style="min-height:500px;">
+    <div style="display:flex; height:100%;">
+      <!-- 左侧迭代列表 -->
+      <div style="width:180px; border-right:1px solid #e8e8e8; padding:16px; flex-shrink:0;">
+        <div style="font-weight:600; margin-bottom:12px; color:#1890ff;">迭代版本</div>
+        <div style="padding:10px 12px; background:#e6f7ff; border-radius:6px; margin-bottom:6px; border-left:3px solid #1890ff; cursor:pointer;">
+          <div style="font-weight:500;">V2.5 迭代</div>
+          <div style="font-size:12px; color:#999;">04-25</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.4 迭代</div>
+          <div style="font-size:12px; color:#999;">04-24</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.1 迭代</div>
+          <div style="font-size:12px; color:#999;">04-23</div>
+        </div>
+        <div style="padding:10px 12px; border-radius:6px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-weight:500;">V2.0 迭代</div>
+          <div style="font-size:12px; color:#999;">04-22</div>
+        </div>
+      </div>
+
+      <!-- 右侧主区域 -->
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <!-- 顶部 Tab -->
+        <div style="border-bottom:1px solid #e8e8e8; display:flex;">
+          <div style="padding:12px 24px; color:#1890ff; border-bottom:2px solid #1890ff; font-weight:500; cursor:pointer;">需求文档</div>
+          <div style="padding:12px 24px; color:#999; cursor:pointer;">流程图</div>
+        </div>
+
+        <!-- Tab 1: 需求文档（左目录 + 右内容） -->
+        <div style="flex:1; display:flex;">
+          <!-- 文档目录 -->
+          <div style="width:220px; border-right:1px solid #e8e8e8; padding:16px; overflow-y:auto;">
+            <div style="font-weight:600; margin-bottom:10px; font-size:13px;">目录</div>
+            <div style="padding:6px 10px; background:#e6f7ff; border-radius:4px; margin-bottom:4px; font-size:13px; color:#1890ff; cursor:pointer;">1. 功能概述</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">2. 业务背景</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">3. 功能需求</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.1 订单规则初始化</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.2 规则编辑与联动</div>
+            <div style="padding:6px 20px; margin-bottom:4px; font-size:12px; color:#999; cursor:pointer;">3.3 三方联动机制</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">4. 非功能需求</div>
+            <div style="padding:6px 10px; margin-bottom:4px; font-size:13px; color:#666; cursor:pointer;">5. 验收标准</div>
+          </div>
+
+          <!-- 文档内容 -->
+          <div style="flex:1; padding:24px; overflow-y:auto;">
+            <h2 style="margin:0 0 16px 0; color:#333;">调整单 — 订单规则模块 PRD</h2>
+            <h3 style="color:#1890ff;">1. 功能概述</h3>
+            <p style="color:#555; line-height:1.8;">调整单中的订单规则模块支持多订单选择后，对每个订单的核算规则进行查看与编辑。通过三方联动机制，实现调整项目、订单规则、业务信息之间的数据联动...</p>
+            <h3>2. 业务背景</h3>
+            <div style="height:60px; background:#f5f5f5; border-radius:4px; margin-bottom:12px;"></div>
+            <h3>3. 功能需求</h3>
+            <p style="color:#555; line-height:1.8;">3.1 订单规则初始化：选择订单后自动加载当前核算规则...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px; display:flex; gap:12px;">
+  <div class="mockup" style="flex:1;">
+    <div class="mockup-header">流程图 Tab 效果</div>
+    <div class="mockup-body" style="min-height:200px; padding:16px;">
+      <div style="display:flex; flex-wrap:wrap; gap:16px;">
+        <div style="flex:1; min-width:200px; border:1px solid #e8e8e8; border-radius:8px; overflow:hidden;">
+          <div style="height:140px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px;">流程图预览</div>
+          <div style="padding:8px 12px; font-weight:500; font-size:13px;">订单规则初始化流程</div>
+        </div>
+        <div style="flex:1; min-width:200px; border:1px solid #e8e8e8; border-radius:8px; overflow:hidden;">
+          <div style="height:140px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px;">流程图预览</div>
+          <div style="padding:8px 12px; font-weight:500; font-size:13px;">收入生成主流程</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px; padding:16px; background:#f6f8fa; border-radius:8px;">
+  <h4 style="margin:0 0 8px 0;">交互说明</h4>
+  <ul style="margin:0; padding-left:20px; color:#555; line-height:1.8;">
+    <li>左侧迭代列表点击切换 → 右侧内容整体切换</li>
+    <li>右侧顶部 Tab：<strong>需求文档</strong> / <strong>流程图</strong></li>
+    <li>需求文档 Tab：左目录 + 右内容，点击目录定位章节</li>
+    <li>流程图 Tab：直接展示流程图图片，点击放大查看</li>
+    <li>如果某迭代无文档/流程图，显示空状态提示</li>
+  </ul>
+</div>

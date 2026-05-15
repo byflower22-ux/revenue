@@ -1,0 +1,143 @@
+<h2>收入统计模块：布局方案</h2>
+<p class="subtitle">统计占小部分，明细占大部分。你更倾向哪种布局？</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">方案 A：顶部横条统计 + 下方明细表</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <!-- Stats bar -->
+      <div style="display:flex; gap:24px; padding:12px 16px; background:#fafafa; border-radius:6px; margin-bottom:16px; align-items:center;">
+        <div style="flex:1; text-align:center;">
+          <div style="font-size:11px; color:#8c8c8c;">总应确认</div>
+          <div style="font-size:18px; font-weight:700; color:#1890ff;">¥29,800</div>
+        </div>
+        <div style="width:1px; height:32px; background:#e8e8e8;"></div>
+        <div style="flex:1; text-align:center;">
+          <div style="font-size:11px; color:#8c8c8c;">已确认</div>
+          <div style="font-size:18px; font-weight:700; color:#52c41a;">¥29,800</div>
+        </div>
+        <div style="width:1px; height:32px; background:#e8e8e8;"></div>
+        <div style="flex:1; text-align:center;">
+          <div style="font-size:11px; color:#8c8c8c;">待确认</div>
+          <div style="font-size:18px; font-weight:700; color:#faad14;">¥0</div>
+        </div>
+      </div>
+      <!-- Table mockup -->
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead>
+          <tr style="background:#fafafa;">
+            <th style="padding:8px; text-align:left; border:1px solid #f0f0f0;">收入类型</th>
+            <th style="padding:8px; text-align:center; border:1px solid #f0f0f0;">比例</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">应确认</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">已确认</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">待确认</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#e6f7ff; color:#1890ff; padding:2px 6px; border-radius:3px; font-size:11px;">业务收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">50%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥14,900</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥14,900</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">导流收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">25%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥7,450</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥7,450</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#f9f0ff; color:#722ed1; padding:2px 6px; border-radius:3px; font-size:11px;">交付收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">18%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥5,364</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥5,364</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#fff7e6; color:#fa8c16; padding:2px 6px; border-radius:3px; font-size:11px;">渠道分成</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">7%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥2,086</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥2,086</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+          </tr>
+          <tr style="background:#fafafa; font-weight:700;">
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;" colspan="2">合计</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#1890ff;">¥29,800</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥29,800</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">方案 B：内嵌统计行 + 明细表（无单独统计区）</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="margin-bottom:12px; font-size:13px; color:#8c8c8c;">当前匹配规则 <span style="background:#e6f7ff; color:#1890ff; padding:2px 8px; border-radius:3px;">v3</span>，收入明细如下：</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead>
+          <tr style="background:#fafafa;">
+            <th style="padding:8px; text-align:left; border:1px solid #f0f0f0;">收入类型</th>
+            <th style="padding:8px; text-align:center; border:1px solid #f0f0f0;">比例</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">应确认</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">已确认</th>
+            <th style="padding:8px; text-align:right; border:1px solid #f0f0f0;">待确认</th>
+            <th style="padding:8px; text-align:center; border:1px solid #f0f0f0;">状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#e6f7ff; color:#1890ff; padding:2px 6px; border-radius:3px; font-size:11px;">业务收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">50%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥14,900</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥14,900</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">已确认</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">导流收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">25%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥7,450</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥7,450</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">已确认</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#f9f0ff; color:#722ed1; padding:2px 6px; border-radius:3px; font-size:11px;">交付收入</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">18%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥5,364</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥5,364</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">已确认</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;"><span style="background:#fff7e6; color:#fa8c16; padding:2px 6px; border-radius:3px; font-size:11px;">渠道分成</span></td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;">7%</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0;">¥2,086</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥2,086</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;"><span style="background:#f6ffed; color:#52c41a; padding:2px 6px; border-radius:3px; font-size:11px;">已确认</span></td>
+          </tr>
+          <tr style="background:#fafafa; font-weight:700;">
+            <td style="padding:6px 8px; border:1px solid #f0f0f0;" colspan="2">合计</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#1890ff;">¥29,800</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#52c41a;">¥29,800</td>
+            <td style="padding:6px 8px; text-align:right; border:1px solid #f0f0f0; color:#faad14;">¥0</td>
+            <td style="padding:6px 8px; text-align:center; border:1px solid #f0f0f0;"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 16px; padding: 12px 16px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; font-size: 13px;">
+  <strong>说明：</strong>
+  <ul style="margin: 6px 0 0 16px;">
+    <li><strong>方案 A</strong>：顶部一行横条展示三个汇总数字（总应确认/已确认/待确认），下方是完整的收入明细表</li>
+    <li><strong>方案 B</strong>：取消单独的统计区，直接在明细表中增加"状态"列，汇总行在表格底部</li>
+  </ul>
+</div>

@@ -1,0 +1,26 @@
+<h2>订单基础信息：布局方案</h2>
+<p class="subtitle">当前所有字段平铺在一个大表格里，没有视觉层次。你更倾向哪种分组方式？</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>分区卡片式</h3>
+      <p>将基础信息拆分为 2-3 个小卡片：核心信息（订单号、金额、状态）+ 产品/活动信息 + 负责人信息。每个卡片有独立标题，折叠展开。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>顶部摘要 + 折叠详情</h3>
+      <p>顶部只展示 3-5 个核心字段（订单号、金额、状态、产品名），其余字段放在可折叠的"更多信息"区域里。页面一屏看到最关键的信息。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>左右分栏式</h3>
+      <p>左侧放订单核心信息（金额、状态、时间线），右侧放客户/产品/负责人等辅助信息。两栏独立滚动。</p>
+    </div>
+  </div>
+</div>

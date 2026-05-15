@@ -1,0 +1,122 @@
+<h2>订单核算详情页 - 布局方案</h2>
+<p class="subtitle">核算是主体内容，订单信息是辅助上下文。选一个方向：</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">方案 A：顶部摘要条 + 核算主体区</div>
+    <div class="mockup-body" style="padding: 12px; font-size: 12px;">
+      <!-- Top summary strip -->
+      <div style="background:#f0f5ff; border-radius:4px; padding:8px 12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; gap:16px; align-items:center;">
+          <strong>ORD2024010001</strong>
+          <span style="background:#52c41a; color:#fff; padding:1px 6px; border-radius:3px; font-size:11px;">已完成</span>
+          <span>¥29,800</span>
+          <span style="color:#8c8c8c;">特训营课程-AI实战班</span>
+          <span style="color:#8c8c8c;">|</span>
+          <span style="color:#8c8c8c;">张三 / 李四 / 特训营业务组</span>
+          <a style="color:#1890ff; font-size:11px;">展开更多信息</a>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <button style="font-size:11px; padding:2px 8px;">收入调整</button>
+          <button style="font-size:11px; padding:2px 8px;">规则调整</button>
+        </div>
+      </div>
+      <!-- Main revenue area -->
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <div style="background:#fafafa; border-radius:4px; padding:6px 10px; width:120px; text-align:center;">
+          <div style="font-size:10px; color:#8c8c8c;">已确认</div>
+          <div style="font-size:16px; font-weight:700; color:#52c41a;">¥29,800</div>
+        </div>
+        <div style="background:#fafafa; border-radius:4px; padding:6px 10px; width:120px; text-align:center;">
+          <div style="font-size:10px; color:#8c8c8c;">待确认</div>
+          <div style="font-size:16px; font-weight:700; color:#faad14;">¥0</div>
+        </div>
+      </div>
+      <!-- Revenue breakdown + flow table -->
+      <div style="display:flex; gap:10px;">
+        <div style="flex:0 0 35%;">
+          <div style="font-weight:600; margin-bottom:4px; font-size:11px;">收入构成</div>
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <tr style="background:#fafafa;"><th style="padding:3px 6px; text-align:left;">类型</th><th style="padding:3px 6px;">比例</th><th style="padding:3px 6px; text-align:right;">已确认</th></tr>
+            <tr><td style="padding:2px 6px;">业务收入</td><td style="padding:2px 6px; text-align:center;">50%</td><td style="padding:2px 6px; text-align:right; color:#52c41a;">¥14,900</td></tr>
+            <tr><td style="padding:2px 6px;">导流收入</td><td style="padding:2px 6px; text-align:center;">25%</td><td style="padding:2px 6px; text-align:right; color:#52c41a;">¥7,450</td></tr>
+            <tr><td style="padding:2px 6px;">交付收入</td><td style="padding:2px 6px; text-align:center;">18%</td><td style="padding:2px 6px; text-align:right; color:#52c41a;">¥5,364</td></tr>
+            <tr><td style="padding:2px 6px;">渠道分成</td><td style="padding:2px 6px; text-align:center;">7%</td><td style="padding:2px 6px; text-align:right; color:#52c41a;">¥2,086</td></tr>
+          </table>
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:600; margin-bottom:4px; font-size:11px;">收入核算明细</div>
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <tr style="background:#fafafa;"><th style="padding:3px 6px;">时间</th><th style="padding:3px 6px;">操作类型</th><th style="padding:3px 6px;">子类型</th><th style="padding:3px 6px;">收入类型</th><th style="padding:3px 6px;">明细单号</th><th style="padding:3px 6px; text-align:right;">变化金额</th><th style="padding:3px 6px; text-align:right;">确认基数</th><th style="padding:3px 6px;">确认比例</th><th style="padding:3px 6px; text-align:right;">确认金额</th><th style="padding:3px 6px;">归属团队</th><th style="padding:3px 6px;">交付单号</th><th style="padding:3px 6px;">售后单号</th></tr>
+            <tr><td style="padding:2px 6px;">2024-03-15...</td><td style="padding:2px 6px;">增加</td><td style="padding:2px 6px;">订单支付</td><td style="padding:2px 6px;">业务收入</td><td style="padding:2px 6px;">PAY-...-1</td><td style="padding:2px 6px; text-align:right;">¥29,800</td><td style="padding:2px 6px; text-align:right;">¥29,800</td><td style="padding:2px 6px;">50%</td><td style="padding:2px 6px; text-align:right;">¥14,900</td><td style="padding:2px 6px;">特训营业务组</td><td style="padding:2px 6px;">-</td><td style="padding:2px 6px;">-</td></tr>
+            <tr><td style="padding:2px 6px;">2024-03-15...</td><td style="padding:2px 6px;">增加</td><td style="padding:2px 6px;">订单支付</td><td style="padding:2px 6px;">导流收入</td><td style="padding:2px 6px;">PAY-...-2</td><td style="padding:2px 6px; text-align:right;">¥29,800</td><td style="padding:2px 6px; text-align:right;">¥29,800</td><td style="padding:2px 6px;">25%</td><td style="padding:2px 6px; text-align:right;">¥7,450</td><td style="padding:2px 6px;">导流运营组</td><td style="padding:2px 6px;">-</td><td style="padding:2px 6px;">-</td></tr>
+          </table>
+        </div>
+      </div>
+      <!-- Bottom tabs -->
+      <div style="margin-top:10px; border-top:1px solid #f0f0f0; padding-top:8px;">
+        <span style="color:#1890ff; font-size:11px; margin-right:12px;">规则快照</span>
+        <span style="font-size:11px; color:#8c8c8c; margin-right:12px;">支付/交付记录</span>
+        <span style="font-size:11px; color:#8c8c8c;">调整记录</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">方案 B：左侧订单信息 + 右侧核算主体</div>
+    <div class="mockup-body" style="padding: 12px; font-size: 12px; display:flex; gap:10px;">
+      <!-- Left sidebar -->
+      <div style="flex:0 0 220px; font-size:11px;">
+        <div style="font-weight:600; margin-bottom:6px;">订单信息</div>
+        <div style="color:#8c8c8c; line-height:1.8;">
+          <div>订单号: <strong style="color:#1890ff;">ORD2024010001</strong></div>
+          <div>状态: <span style="background:#f6ffed; color:#52c41a; padding:0 4px;">已完成</span></div>
+          <div>金额: <strong style="color:#f5222d;">¥29,800</strong></div>
+          <div>产品: 特训营课程-AI实战班</div>
+          <div>买家: 张三</div>
+          <div>负责人: 李四</div>
+          <div>团队: 特训营业务组</div>
+          <div>下单: 2024-03-15</div>
+          <div>支付: 2024-03-15</div>
+          <div>规则: v1</div>
+          <a style="color:#1890ff; font-size:10px;">查看完整信息</a>
+        </div>
+        <div style="margin-top:8px;">
+          <button style="font-size:10px; padding:1px 6px; width:100%; margin-bottom:3px;">收入调整</button>
+          <button style="font-size:10px; padding:1px 6px; width:100%;">规则调整</button>
+        </div>
+      </div>
+      <!-- Right main -->
+      <div style="flex:1;">
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <div style="background:#f6ffed; border-radius:4px; padding:4px 10px;">
+            <div style="font-size:9px; color:#8c8c8c;">已确认</div>
+            <div style="font-size:14px; font-weight:700; color:#52c41a;">¥29,800</div>
+          </div>
+          <div style="background:#fffbe6; border-radius:4px; padding:4px 10px;">
+            <div style="font-size:9px; color:#8c8c8c;">待确认</div>
+            <div style="font-size:14px; font-weight:700; color:#faad14;">¥0</div>
+          </div>
+        </div>
+        <div style="font-weight:600; margin-bottom:4px; font-size:11px;">收入核算明细</div>
+        <table style="width:100%; border-collapse:collapse; font-size:10px;">
+          <tr style="background:#fafafa;"><th style="padding:2px 4px;">时间</th><th style="padding:2px 4px;">操作类型</th><th style="padding:2px 4px;">子类型</th><th style="padding:2px 4px;">收入类型</th><th style="padding:2px 4px;">明细单号</th><th style="padding:2px 4px; text-align:right;">变化金额</th><th style="padding:2px 4px; text-align:right;">确认基数</th><th style="padding:2px 4px;">比例</th><th style="padding:2px 4px; text-align:right;">确认金额</th><th style="padding:2px 4px;">团队</th></tr>
+          <tr><td style="padding:1px 4px;">03-15 09:35</td><td>增加</td><td>订单支付</td><td>业务收入</td><td>PAY-..-1</td><td style="text-align:right;">¥29,800</td><td style="text-align:right;">¥29,800</td><td>50%</td><td style="text-align:right;">¥14,900</td><td>特训营业务组</td></tr>
+          <tr><td style="padding:1px 4px;">03-15 09:35</td><td>增加</td><td>订单支付</td><td>导流收入</td><td>PAY-..-2</td><td style="text-align:right;">¥29,800</td><td style="text-align:right;">¥29,800</td><td>25%</td><td style="text-align:right;">¥7,450</td><td>导流运营组</td></tr>
+          <tr><td style="padding:1px 4px;">03-15 09:35</td><td>增加</td><td>订单支付</td><td>渠道分成</td><td>PAY-..-3</td><td style="text-align:right;">¥29,800</td><td style="text-align:right;">¥29,800</td><td>5%</td><td style="text-align:right;">¥1,490</td><td>渠道合作组</td></tr>
+          <tr><td style="padding:1px 4px;">03-16 10:00</td><td>增加</td><td>订单交付</td><td>交付收入</td><td>DLV-..-1</td><td style="text-align:right;">¥29,800</td><td style="text-align:right;">¥29,800</td><td>15%</td><td style="text-align:right;">¥4,470</td><td>交付服务组</td></tr>
+        </table>
+        <div style="margin-top:8px; border-top:1px solid #f0f0f0; padding-top:6px;">
+          <span style="color:#1890ff; font-size:10px; margin-right:10px;">规则快照</span>
+          <span style="font-size:10px; color:#8c8c8c; margin-right:10px;">支付/交付记录</span>
+          <span style="font-size:10px; color:#8c8c8c;">调整记录</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 12px; padding: 10px 14px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; font-size: 12px;">
+  <strong>方案 A</strong>：顶部一条摘要条 + 收入构成和核算明细左右并排。订单信息默认收起。<br>
+  <strong>方案 B</strong>：左侧窄栏放订单信息 + 右侧大区域放核算内容。核算占页面 3/4。
+</div>
