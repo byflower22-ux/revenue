@@ -12,11 +12,11 @@ const require = createRequire(import.meta.url);
  * Files without a version tag are grouped under "未分类".
  */
 export default function docCenterPlugin() {
-  const projectRoot = resolve(__dirname, '../..');
+  const projectRoot = __dirname;
   const docsDir = join(projectRoot, '需求文档');
   const flowsDir = join(projectRoot, '流程图');
   const casesDir = join(projectRoot, '测试用例');
-  const publicDir = resolve(__dirname, 'public');
+  const publicDir = join(__dirname, 'public');
   const publicDocs = join(publicDir, 'docs');
   const publicFlows = join(publicDir, 'flows');
   const publicCases = join(publicDir, 'cases');
