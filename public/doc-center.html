@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文档中心</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #1890ff;
+    --primary-light: #e6f7ff;
+    --primary-border: #91d5ff;
+    --purple: #722ed1;
+    --purple-light: #f9f0ff;
+    --purple-border: #b37feb;
+    --text: rgba(0, 0, 0, 0.85);
+    --text-secondary: rgba(0, 0, 0, 0.45);
+    --border: #f0f0f0;
+    --bg: #fff;
+    --bg-grey: #fafafa;
+    --hover-bg: #f5f5f5;
+  }
+
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif; color: var(--text); font-size: 14px; background: var(--bg-grey); }
+
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ---- Header ---- */
+  .header {
+    display: flex; align-items: center; gap: 24px;
+    padding: 0 24px; height: 56px; min-height: 56px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .header-title { font-size: 18px; font-weight: 600; white-space: nowrap; }
+  .header-tabs { display: flex; gap: 0; }
+  .header-tab {
+    padding: 8px 20px; cursor: pointer; border: none; background: none;
+    font-size: 14px; color: var(--text-secondary); border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .header-tab:hover { color: var(--text); }
+  .header-tab.active-doc { color: var(--primary); border-bottom-color: var(--primary); }
+  .header-tab.active-flow { color: var(--purple); border-bottom-color: var(--purple); }
+  .header-tab.active-case { color: #52c41a; border-bottom-color: #52c41a; }
+
+  /* ---- Body ---- */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* Left panel */
+  .left-panel {
+    width: 180px; min-width: 180px; background: var(--bg);
+    border-right: 1px solid var(--border); overflow-y: auto;
+  }
+  .version-item {
+    padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent;
+    transition: background .2s, border-color .2s;
+  }
+  .version-item:hover { background: var(--hover-bg); }
+  .version-item.active { background: var(--primary-light); border-left-color: var(--primary); }
+  .version-item.active .version-label { color: var(--primary); font-weight: 600; }
+  .version-label { font-size: 14px; margin-bottom: 2px; }
+  .version-date { font-size: 12px; color: var(--text-secondary); }
+
+  /* Middle panel */
+  .middle-panel {
+    width: 220px; min-width: 220px; background: var(--bg);
+    border-right: 1px solid var(--border); overflow-y: auto;
+  }
+  .middle-title { padding: 12px 16px 8px; font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* TOC items */
+  .toc-item {
+    padding: 6px 16px; cursor: pointer; font-size: 13px;
+    border-left: 3px solid transparent; transition: all .2s;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--text);
+  }
+  .toc-item:hover { background: var(--hover-bg); color: var(--primary); }
+  .toc-item.active { background: var(--primary-light); border-left-color: var(--primary); color: var(--primary); font-weight: 600; }
+  .toc-item[data-level="2"] { padding-left: 28px; }
+  .toc-item[data-level="3"] { padding-left: 40px; }
+  .toc-item[data-level="4"] { padding-left: 52px; }
+
+  /* Flow items */
+  .flow-item {
+    padding: 10px 16px; cursor: pointer; font-size: 13px;
+    border-left: 3px solid transparent; transition: all .2s;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .flow-item:hover { background: var(--hover-bg); }
+  .flow-item.active { background: var(--purple-light); border-left-color: var(--purple); color: var(--purple); font-weight: 600; }
+
+  /* Right panel */
+  .right-panel { flex: 1; overflow: auto; background: var(--bg); position: relative; }
+
+  /* Markdown content */
+  .md-content { padding: 32px 40px 80px; max-width: 900px; }
+  .md-content h1 { font-size: 28px; font-weight: 600; margin: 24px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .md-content h2 { font-size: 22px; font-weight: 600; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .md-content h3 { font-size: 18px; font-weight: 600; margin: 20px 0 8px; }
+  .md-content h4 { font-size: 16px; font-weight: 600; margin: 16px 0 6px; }
+  .md-content p { margin: 8px 0; line-height: 1.8; }
+  .md-content ul, .md-content ol { padding-left: 24px; margin: 8px 0; }
+  .md-content li { margin: 4px 0; line-height: 1.8; }
+  .md-content table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  .md-content th, .md-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+  .md-content th { background: var(--bg-grey); font-weight: 600; }
+  .md-content code { background: var(--bg-grey); padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  .md-content pre { background: var(--bg-grey); padding: 12px 16px; border-radius: 4px; overflow-x: auto; margin: 12px 0; }
+  .md-content pre code { background: none; padding: 0; }
+  .md-content blockquote { border-left: 4px solid var(--primary-border); padding: 8px 16px; margin: 12px 0; background: var(--primary-light); color: var(--text); }
+  .md-content a { color: var(--primary); text-decoration: none; }
+  .md-content a:hover { text-decoration: underline; }
+  .md-content img { max-width: 100%; }
+
+  /* Flow viewer */
+  .flow-viewer { display: flex; flex-direction: column; height: 100%; }
+  .flow-toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .flow-toolbar button {
+    padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--bg); cursor: pointer; font-size: 13px; color: var(--text);
+    transition: border-color .2s, color .2s;
+  }
+  .flow-toolbar button:hover { color: var(--purple); border-color: var(--purple); }
+  .flow-zoom-label { font-size: 13px; color: var(--text-secondary); min-width: 48px; text-align: center; }
+  .flow-toolbar .spacer { flex: 1; }
+  .flow-canvas {
+    flex: 1; overflow: auto; display: flex; align-items: flex-start;
+    justify-content: flex-start; padding: 16px; background: var(--bg-grey);
+  }
+  .flow-canvas img {
+    transform-origin: 0 0; transition: transform .15s ease-out;
+    max-width: none;
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 100%; color: var(--text-secondary);
+    gap: 12px;
+  }
+  .empty-state-icon { font-size: 48px; opacity: .25; }
+  .empty-state-text { font-size: 14px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* Loading */
+  .loading { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-title">文档中心</div>
+    <div class="header-tabs">
+      <button class="header-tab active-doc" id="tab-doc" onclick="switchTab('doc')">需求文档</button>
+      <button class="header-tab" id="tab-flow" onclick="switchTab('flow')">流程图</button>
+      <button class="header-tab" id="tab-case" onclick="switchTab('case')">测试用例</button>
+    </div>
+  </div>
+  <div class="body">
+    <div class="left-panel" id="left-panel"></div>
+    <div class="middle-panel" id="middle-panel"></div>
+    <div class="right-panel" id="right-panel">
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text">请从左侧选择版本</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- State ----
+  let manifest = null;
+  let activeVersionIdx = -1;
+  let activeTab = 'doc'; // 'doc' | 'flow' | 'case'
+  let activeDocIdx = -1;
+  let activeFlowIdx = -1;
+  let activeCaseIdx = -1;
+  let flowZoom = 50;
+  let cachedMd = null; // cache markdown to avoid double fetch
+
+  const MIN_ZOOM = 25;
+  const MAX_ZOOM = 300;
+  const ZOOM_STEP = 25;
+
+  // ---- Base path ----
+  const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+
+  // ---- DOM refs ----
+  const $left   = document.getElementById('left-panel');
+  const $middle = document.getElementById('middle-panel');
+  const $right  = document.getElementById('right-panel');
+  const $tabDoc  = document.getElementById('tab-doc');
+  const $tabFlow = document.getElementById('tab-flow');
+  const $tabCase = document.getElementById('tab-case');
+
+  // ---- Init ----
+  fetch(basePath + 'doc-manifest.json')
+    .then(r => { if (!r.ok) throw new Error('fetch manifest failed'); return r.json(); })
+    .then(data => { manifest = data; render(); })
+    .catch(() => {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">无法加载文档清单 (doc-manifest.json)</div></div>';
+    });
+
+  // ---- Tab switching ----
+  window.switchTab = function (tab) {
+    activeTab = tab;
+    $tabDoc.className  = 'header-tab' + (tab === 'doc'  ? ' active-doc'  : '');
+    $tabFlow.className = 'header-tab' + (tab === 'flow' ? ' active-flow' : '');
+    $tabCase.className = 'header-tab' + (tab === 'case' ? ' active-case' : '');
+    if (tab === 'doc') {
+      activeFlowIdx = -1;
+      activeCaseIdx = -1;
+    } else if (tab === 'flow') {
+      activeDocIdx = -1;
+      activeCaseIdx = -1;
+      cachedMd = null;
+    } else {
+      activeDocIdx = -1;
+      activeFlowIdx = -1;
+    }
+    renderMiddle();
+    renderRight();
+  };
+
+  // ---- Render versions ----
+  function render() {
+    if (!manifest || !manifest.versions.length) {
+      $left.innerHTML = '<div class="empty-state"><div class="empty-state-text">暂无版本</div></div>';
+      return;
+    }
+    $left.innerHTML = manifest.versions.map((v, i) =>
+      '<div class="version-item' + (i === activeVersionIdx ? ' active' : '') + '" data-idx="' + i + '">' +
+        '<div class="version-label">' + escHtml(v.label) + '</div>' +
+        '<div class="version-date">' + escHtml(v.date || '') + '</div>' +
+      '</div>'
+    ).join('');
+
+    $left.querySelectorAll('.version-item').forEach(el => {
+      el.addEventListener('click', function () {
+        activeVersionIdx = parseInt(this.dataset.idx, 10);
+        activeDocIdx = -1;
+        activeFlowIdx = -1;
+        activeCaseIdx = -1;
+        flowZoom = 50;
+        cachedMd = null;
+        render();
+      });
+    });
+
+    renderMiddle();
+    renderRight();
+  }
+
+  // ---- Render middle panel ----
+  function renderMiddle() {
+    if (activeVersionIdx < 0 || !manifest) { $middle.innerHTML = ''; return; }
+    const ver = manifest.versions[activeVersionIdx];
+
+    if (activeTab === 'doc') {
+      renderDocMiddle(ver);
+    } else if (activeTab === 'flow') {
+      renderFlowMiddle(ver);
+    } else {
+      renderCaseMiddle(ver);
+    }
+  }
+
+  function renderDocMiddle(ver) {
+    const docs = ver.docs || [];
+    if (!docs.length) {
+      $middle.innerHTML = '<div class="middle-title">目录</div><div class="empty-state" style="padding:40px 16px"><div class="empty-state-text">暂无需求文档</div></div>';
+      return;
+    }
+    // Show flat list of docs; once one is selected, show TOC
+    if (activeDocIdx < 0) {
+      $middle.innerHTML = '<div class="middle-title">文档列表</div>' +
+        docs.map((d, i) =>
+          '<div class="toc-item" data-idx="' + i + '">' + escHtml(d.title) + '</div>'
+        ).join('');
+      $middle.querySelectorAll('.toc-item').forEach(el => {
+        el.addEventListener('click', function () {
+          activeDocIdx = parseInt(this.dataset.idx, 10);
+          cachedMd = null;
+          renderMiddle();
+          renderRight();
+        });
+      });
+    } else {
+      // Load markdown once, render TOC and content together
+      const doc = docs[activeDocIdx];
+      $right.innerHTML = '<div class="loading">加载中...</div>';
+      fetch(basePath + doc.file)
+        .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .then(md => {
+          cachedMd = md;
+
+          // Render TOC
+          const toc = parseToc(md);
+          if (!toc.length) {
+            $middle.innerHTML = '<div class="middle-title">目录</div><div class="empty-state" style="padding:40px 16px"><div class="empty-state-text">无标题</div></div>';
+            return;
+          }
+          $middle.innerHTML = '<div class="middle-title">' + escHtml(doc.title) + '</div>' +
+            '<div class="toc-item" data-idx="-1" style="color:var(--text-secondary)">← 返回列表</div>' +
+            toc.map(t =>
+              '<div class="toc-item" data-level="' + t.level + '" data-anchor="' + escAttr(t.id) + '">' + escHtml(t.text) + '</div>'
+            ).join('');
+
+          // Back button
+          $middle.querySelector('[data-idx="-1"]').addEventListener('click', () => {
+            activeDocIdx = -1;
+            renderMiddle();
+            renderRight();
+          });
+
+          // TOC click
+          $middle.querySelectorAll('.toc-item[data-anchor]').forEach(el => {
+            el.addEventListener('click', function () {
+              const anchor = this.dataset.anchor;
+              const target = document.getElementById(anchor);
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            });
+          });
+
+          // Render content using same fetched md
+          renderDocContent(md);
+        })
+        .catch(() => {
+          $middle.innerHTML = '<div class="middle-title">目录</div><div class="empty-state" style="padding:40px 16px"><div class="empty-state-text">加载失败</div></div>';
+        });
+    }
+  }
+
+  function renderFlowMiddle(ver) {
+    const flows = ver.flows || [];
+    if (!flows.length) {
+      $middle.innerHTML = '<div class="middle-title">流程图</div><div class="empty-state" style="padding:40px 16px"><div class="empty-state-text">暂无流程图</div></div>';
+      return;
+    }
+    $middle.innerHTML = '<div class="middle-title">流程图</div>' +
+      flows.map((f, i) =>
+        '<div class="flow-item' + (i === activeFlowIdx ? ' active' : '') + '" data-idx="' + i + '">' + escHtml(f.title) + '</div>'
+      ).join('');
+    $middle.querySelectorAll('.flow-item').forEach(el => {
+      el.addEventListener('click', function () {
+        activeFlowIdx = parseInt(this.dataset.idx, 10);
+        flowZoom = 50;
+        renderMiddle();
+        renderRight();
+      });
+    });
+  }
+
+  // ---- Render right panel ----
+  function renderRight() {
+    if (activeVersionIdx < 0 || !manifest) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">请从左侧选择版本</div></div>';
+      return;
+    }
+    const ver = manifest.versions[activeVersionIdx];
+
+    if (activeTab === 'doc') {
+      renderDocRight(ver);
+    } else if (activeTab === 'flow') {
+      renderFlowRight(ver);
+    } else {
+      renderCaseRight(ver);
+    }
+  }
+
+  function renderDocRight(ver) {
+    const docs = ver.docs || [];
+    if (!docs.length) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><div class="empty-state-text">当前版本暂无需求文档</div></div>';
+      return;
+    }
+    if (activeDocIdx < 0) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><div class="empty-state-text">请从左侧列表选择文档</div></div>';
+      return;
+    }
+    if (cachedMd) {
+      renderDocContent(cachedMd);
+    }
+    // If no cache, renderMiddle will fetch and call renderDocContent
+  }
+
+  function renderDocContent(md) {
+    const html = marked.parse(md, { gfm: true, breaks: false });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const headings = assignHeadingIds(container);
+    $right.innerHTML = '<div class="md-content">' + container.innerHTML + '</div>';
+    setupScrollSpy(headings);
+  }
+
+  // ---- Cases Tab ----
+  function renderCaseMiddle(ver) {
+    const cases = ver.cases || [];
+    if (!cases.length) {
+      $middle.innerHTML = '<div class="middle-title">测试用例</div><div class="empty-state" style="padding:40px 16px"><div class="empty-state-text">暂无测试用例</div></div>';
+      return;
+    }
+    $middle.innerHTML = '<div class="middle-title">测试用例</div>' +
+      cases.map((c, i) =>
+        '<div class="flow-item' + (i === activeCaseIdx ? ' active' : '') + '" data-idx="' + i + '" style="border-left-color:' + (i === activeCaseIdx ? '#52c41a' : 'transparent') + ';color:' + (i === activeCaseIdx ? '#52c41a' : '') + '">' + escHtml(c.title) + '</div>'
+      ).join('');
+    $middle.querySelectorAll('.flow-item').forEach(el => {
+      el.addEventListener('click', function () {
+        activeCaseIdx = parseInt(this.dataset.idx, 10);
+        renderMiddle();
+        renderRight();
+      });
+    });
+  }
+
+  function renderCaseRight(ver) {
+    const cases = ver.cases || [];
+    if (!cases.length) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧪</div><div class="empty-state-text">当前版本暂无测试用例</div></div>';
+      return;
+    }
+    if (activeCaseIdx < 0) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧪</div><div class="empty-state-text">请从左侧列表选择测试用例</div></div>';
+      return;
+    }
+    const cs = cases[activeCaseIdx];
+
+    // xmind: show as image with zoom/pan (same as flow)
+    if (cs.thumbnail) {
+      const imgUrl = basePath + cs.thumbnail;
+      const downloadUrl = cs.download ? basePath + cs.download : '';
+
+      $right.innerHTML =
+        '<div class="flow-viewer">' +
+          '<div class="flow-toolbar">' +
+            '<button id="zoom-out" title="缩小">−</button>' +
+            '<span class="flow-zoom-label" id="zoom-label">50%</span>' +
+            '<button id="zoom-in" title="放大">+</button>' +
+            '<button id="zoom-reset" title="重置">重置</button>' +
+            '<span class="spacer"></span>' +
+            (downloadUrl ? '<a href="' + escAttr(downloadUrl) + '" download style="text-decoration:none"><button type="button">下载 xmind</button></a>' : '') +
+          '</div>' +
+          '<div class="flow-canvas" id="flow-canvas">' +
+            '<img id="flow-img" src="' + escAttr(imgUrl) + '" alt="' + escAttr(cs.title) + '" style="transform:scale(0.5)">' +
+          '</div>' +
+        '</div>';
+
+      const $img = document.getElementById('flow-img');
+      const $label = document.getElementById('zoom-label');
+
+      function applyZoom() {
+        $img.style.transform = 'scale(' + (flowZoom / 100) + ')';
+        $label.textContent = flowZoom + '%';
+      }
+
+      document.getElementById('zoom-in').addEventListener('click', () => {
+        flowZoom = Math.min(MAX_ZOOM, flowZoom + ZOOM_STEP);
+        applyZoom();
+      });
+      document.getElementById('zoom-out').addEventListener('click', () => {
+        flowZoom = Math.max(MIN_ZOOM, flowZoom - ZOOM_STEP);
+        applyZoom();
+      });
+      document.getElementById('zoom-reset').addEventListener('click', () => {
+        flowZoom = 50;
+        applyZoom();
+      });
+
+      const $canvas = document.getElementById('flow-canvas');
+      $canvas.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          flowZoom = e.deltaY < 0 ? Math.min(MAX_ZOOM, flowZoom + ZOOM_STEP) : Math.max(MIN_ZOOM, flowZoom - ZOOM_STEP);
+          applyZoom();
+        }
+      }, { passive: false });
+
+      // Drag to pan
+      let isDragging = false;
+      let dragStartX = 0, dragStartY = 0, scrollStartX = 0, scrollStartY = 0;
+      $canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragStartX = e.clientX; dragStartY = e.clientY;
+        scrollStartX = $canvas.scrollLeft; scrollStartY = $canvas.scrollTop;
+        $canvas.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      const onMove = (e) => {
+        if (!isDragging) return;
+        $canvas.scrollLeft = scrollStartX - (e.clientX - dragStartX);
+        $canvas.scrollTop = scrollStartY - (e.clientY - dragStartY);
+      };
+      const onUp = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        $canvas.style.cursor = 'grab';
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      $canvas.style.cursor = 'grab';
+
+    // md fallback
+    } else if (cs.file) {
+      $right.innerHTML = '<div class="loading">加载中...</div>';
+      fetch(basePath + cs.file)
+        .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .then(md => { renderDocContent(md); })
+        .catch(() => {
+          $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">测试用例加载失败</div></div>';
+        });
+    }
+  }
+
+  function renderFlowRight(ver) {
+    const flows = ver.flows || [];
+    if (!flows.length) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🖼️</div><div class="empty-state-text">当前版本暂无流程图</div></div>';
+      return;
+    }
+    if (activeFlowIdx < 0) {
+      $right.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🖼️</div><div class="empty-state-text">请从左侧列表选择流程图</div></div>';
+      return;
+    }
+    const flow = flows[activeFlowIdx];
+    const imgUrl = basePath + flow.file;
+
+    $right.innerHTML =
+      '<div class="flow-viewer">' +
+        '<div class="flow-toolbar">' +
+          '<button id="zoom-out" title="缩小">−</button>' +
+          '<span class="flow-zoom-label" id="zoom-label">50%</span>' +
+          '<button id="zoom-in" title="放大">+</button>' +
+          '<button id="zoom-reset" title="重置">重置</button>' +
+          '<span class="spacer"></span>' +
+          '<a href="' + escAttr(imgUrl) + '" download="' + escAttr(flow.title) + '.png" style="text-decoration:none"><button type="button">下载</button></a>' +
+        '</div>' +
+        '<div class="flow-canvas" id="flow-canvas">' +
+          '<img id="flow-img" src="' + escAttr(imgUrl) + '" alt="' + escAttr(flow.title) + '" style="transform:scale(0.5)">' +
+        '</div>' +
+      '</div>';
+
+    const $img = document.getElementById('flow-img');
+    const $label = document.getElementById('zoom-label');
+
+    function applyZoom() {
+      $img.style.transform = 'scale(' + (flowZoom / 100) + ')';
+      $label.textContent = flowZoom + '%';
+    }
+
+    document.getElementById('zoom-in').addEventListener('click', () => {
+      flowZoom = Math.min(MAX_ZOOM, flowZoom + ZOOM_STEP);
+      applyZoom();
+    });
+    document.getElementById('zoom-out').addEventListener('click', () => {
+      flowZoom = Math.max(MIN_ZOOM, flowZoom - ZOOM_STEP);
+      applyZoom();
+    });
+    document.getElementById('zoom-reset').addEventListener('click', () => {
+      flowZoom = 100;
+      applyZoom();
+    });
+
+    // Mouse wheel: default scroll, Ctrl+wheel zoom
+    const $canvas = document.getElementById('flow-canvas');
+    $canvas.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          flowZoom = Math.min(MAX_ZOOM, flowZoom + ZOOM_STEP);
+        } else {
+          flowZoom = Math.max(MIN_ZOOM, flowZoom - ZOOM_STEP);
+        }
+        applyZoom();
+      }
+      // Without Ctrl: native scroll works naturally (no preventDefault)
+    }, { passive: false });
+
+    // Drag to pan
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+    let scrollStartX = 0, scrollStartY = 0;
+
+    $canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      scrollStartX = $canvas.scrollLeft;
+      scrollStartY = $canvas.scrollTop;
+      $canvas.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      $canvas.scrollLeft = scrollStartX - dx;
+      $canvas.scrollTop = scrollStartY - dy;
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      $canvas.style.cursor = 'grab';
+    });
+
+    $canvas.style.cursor = 'grab';
+  }
+
+  // ---- TOC parsing ----
+  function headingToId(text) {
+    return text.trim().toLowerCase()
+      .replace(/[^\w一-鿿\- ]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 80);
+  }
+
+  function parseToc(md) {
+    const toc = [];
+    const lines = md.split('\n');
+    const counter = {};
+    for (const line of lines) {
+      const m = line.match(/^(#{1,4})\s+(.+)/);
+      if (m) {
+        const level = m[1].length;
+        const text = m[2].replace(/<[^>]*>/g, '').replace(/[#*`[\]]/g, '').trim();
+        const raw = headingToId(text);
+        counter[raw] = (counter[raw] || 0) + 1;
+        const id = raw + (counter[raw] > 1 ? '-' + counter[raw] : '');
+        toc.push({ level, text, id });
+      }
+    }
+    return toc;
+  }
+
+  function assignHeadingIds(container) {
+    const headings = container.querySelectorAll('h1, h2, h3, h4');
+    const counter = {};
+    headings.forEach(h => {
+      const raw = headingToId(h.textContent);
+      counter[raw] = (counter[raw] || 0) + 1;
+      h.id = raw + (counter[raw] > 1 ? '-' + counter[raw] : '');
+    });
+    return headings;
+  }
+
+  // ---- Scroll spy ----
+  let scrollSpyHandler = null;
+
+  function setupScrollSpy(headings) {
+    if (scrollSpyHandler) {
+      $right.removeEventListener('scroll', scrollSpyHandler);
+      scrollSpyHandler = null;
+    }
+    if (!headings.length) return;
+    // headings are DOM nodes in the right panel
+    const tocItems = $middle.querySelectorAll('.toc-item[data-anchor]');
+    if (!tocItems.length) return;
+
+    function update() {
+      const scrollTop = $right.scrollTop;
+      let current = 0;
+      for (let i = 0; i < headings.length; i++) {
+        if (headings[i].offsetTop - $right.offsetTop - 20 <= scrollTop) {
+          current = i;
+        }
+      }
+      tocItems.forEach(el => el.classList.remove('active'));
+      const anchor = headings[current].id;
+      const match = $middle.querySelector('.toc-item[data-anchor="' + CSS.escape(anchor) + '"]');
+      if (match) {
+        match.classList.add('active');
+      }
+    }
+
+    $right.addEventListener('scroll', update, { passive: true });
+    scrollSpyHandler = update;
+    update();
+  }
+
+  // ---- Helpers ----
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+})();
+</script>
+</body>
+</html>

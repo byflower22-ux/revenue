@@ -14,6 +14,7 @@ import {
   SyncOutlined, ClockCircleOutlined, ExclamationCircleOutlined, DownloadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import * as XLSX from 'xlsx';
 import {
   orders, payments, deliveries, ruleVersions, ruleSnapshots,
   calculateRevenues, calculateRevenueBreakdown, adjustments, addAdjustment,
@@ -21,6 +22,7 @@ import {
 } from './mockData';
 import OrderDetailPage from './OrderDetailPage';
 import AdjustmentPage from './AdjustmentPage';
+import AdjustmentFormPage from './AdjustmentFormPage';
 import './App.css';
 import DemoToggle from './demo/DemoToggle';
 import DocDrawer from './demo/DocDrawer';
@@ -64,9 +66,10 @@ const breadcrumbMap = {
 
 export default function App() {
   const { demoMode, setCurrentPage } = useDemo();
-  const [selectedMenu, setSelectedMenu] = useState('revenue');
+  const [selectedMenu, setSelectedMenu] = useState('order-accounting');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [adjustmentOrderNo, setAdjustmentOrderNo] = useState(null);
   const [activeTab, setActiveTab] = useState('business');
   const [detailTab, setDetailTab] = useState('revenue');
 
@@ -87,9 +90,14 @@ export default function App() {
 
   // Filters for order accounting page
   const [oaFilters, setOaFilters] = useState({
-    orderNo: '', orderType: '', status: '', dateRange: null,
-    buyer: '', product: '', productType: '', buyerSource: '',
-    ruleName: '', ruleId: '', ruleVersion: '',
+    orderSearchType: 'orderNo', orderSearchValue: '',
+    team: '', teamRegion: '',
+    productType: '', department: '',
+    employeeSearchType: 'employeeName', employeeSearchValue: '',
+    buyerSearchType: 'buyerName', buyerSearchValue: '',
+    activityType: '',
+    productSearchType: 'productName', productSearchValue: '',
+    dateSearchType: 'createTime', dateRange: null,
   });
   const [oaFilterExpanded, setOaFilterExpanded] = useState(false);
 
@@ -123,23 +131,45 @@ export default function App() {
 
   // Filtered orders for order accounting page
   const oaFilteredOrders = useMemo(() => {
+    const orderSearchMap = { orderNo: 'orderNo', orderType: 'orderType' };
+    const employeeSearchMap = { employeeName: 'employee', employeeNo: 'employeeNo' };
+    const buyerSearchMap = { buyerName: 'buyer', buyerNo: 'buyerNo', buyerPhone: 'buyerPhone' };
+    const productSearchMap = { productName: 'product', productNo: 'productNo' };
+    const dateSearchMap = { createTime: 'createTime', payTime: 'payTime' };
+
     return getStoredOrders().filter((o) => {
-      if (oaFilters.orderNo && !o.orderNo.includes(oaFilters.orderNo)) return false;
-      if (oaFilters.orderType && o.orderType !== oaFilters.orderType) return false;
-      if (oaFilters.status && o.status !== oaFilters.status) return false;
-      if (oaFilters.buyer && !o.buyer.includes(oaFilters.buyer)) return false;
-      if (oaFilters.product && !o.product.includes(oaFilters.product)) return false;
-      if (oaFilters.productType && o.productType !== oaFilters.productType) return false;
-      if (oaFilters.buyerSource && o.buyerSource !== oaFilters.buyerSource) return false;
-      if (oaFilters.ruleName) {
-        const rule = ruleVersions.find(rv => rv.id === o.matchedRuleId);
-        if (!rule || !rule.name.includes(oaFilters.ruleName)) return false;
+      // Row 1: order search
+      if (oaFilters.orderSearchValue) {
+        const field = orderSearchMap[oaFilters.orderSearchType];
+        if (!o[field] || !o[field].includes(oaFilters.orderSearchValue)) return false;
       }
-      if (oaFilters.ruleId && o.matchedRuleId !== oaFilters.ruleId) return false;
-      if (oaFilters.ruleVersion && o.matchedRuleVersion !== oaFilters.ruleVersion) return false;
+      if (oaFilters.team && o.team !== oaFilters.team) return false;
+      if (oaFilters.teamRegion && o.teamRegion !== oaFilters.teamRegion) return false;
+
+      // Row 2
+      if (oaFilters.productType && o.productType !== oaFilters.productType) return false;
+      if (oaFilters.department && o.department !== oaFilters.department) return false;
+      if (oaFilters.employeeSearchValue) {
+        const field = employeeSearchMap[oaFilters.employeeSearchType];
+        if (!o[field] || !o[field].includes(oaFilters.employeeSearchValue)) return false;
+      }
+
+      // Row 3
+      if (oaFilters.buyerSearchValue) {
+        const field = buyerSearchMap[oaFilters.buyerSearchType];
+        if (!o[field] || !o[field].includes(oaFilters.buyerSearchValue)) return false;
+      }
+      if (oaFilters.activityType && o.activityType !== oaFilters.activityType) return false;
+      if (oaFilters.productSearchValue) {
+        const field = productSearchMap[oaFilters.productSearchType];
+        if (!o[field] || !o[field].includes(oaFilters.productSearchValue)) return false;
+      }
+
+      // Row 4: date search
       if (oaFilters.dateRange) {
         const [start, end] = oaFilters.dateRange;
-        const t = dayjs(o.createTime);
+        const dateField = dateSearchMap[oaFilters.dateSearchType] || 'createTime';
+        const t = dayjs(o[dateField]);
         if (t.isBefore(start) || t.isAfter(end)) return false;
       }
       return true;
@@ -190,6 +220,16 @@ export default function App() {
     setSelectedOrderId(null);
   }, []);
 
+  const handleGoToAdjustment = useCallback((orderNo) => {
+    setAdjustmentOrderNo(orderNo);
+    setSelectedMenu('adjustment-form');
+  }, []);
+
+  const handleBackFromAdjustment = useCallback(() => {
+    setAdjustmentOrderNo(null);
+    setSelectedMenu('order-accounting');
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     setFilters({
       orderNo: '', team: '', teamRegion: '', productType: '',
@@ -199,7 +239,16 @@ export default function App() {
   }, []);
 
   const handleResetOaFilters = useCallback(() => {
-    setOaFilters({ orderNo: '', orderType: '', status: '', dateRange: null, buyer: '', product: '', productType: '', buyerSource: '', ruleName: '', ruleId: '', ruleVersion: '' });
+    setOaFilters({
+      orderSearchType: 'orderNo', orderSearchValue: '',
+      team: '', teamRegion: '',
+      productType: '', department: '',
+      employeeSearchType: 'employeeName', employeeSearchValue: '',
+      buyerSearchType: 'buyerName', buyerSearchValue: '',
+      activityType: '',
+      productSearchType: 'productName', productSearchValue: '',
+      dateSearchType: 'createTime', dateRange: null,
+    });
   }, []);
 
   const handleBatchAdjust = useCallback(() => {
@@ -212,20 +261,58 @@ export default function App() {
     setSelectedRowKeys([]);
   }, [batchTargetRule, selectedRowKeys]);
 
-  const handleDownloadFailedFile = useCallback(() => {
-    const header = '订单号,原规则版本,目标规则版本,失败原因';
-    const rows = batchResult.failed.map((f) =>
-      `${f.orderNo},${f.oldVersion},${f.newVersion},"${f.reason}"`
-    );
-    const csv = '﻿' + header + '\n' + rows.join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `批量调整失败明细_${dayjs().format('YYYYMMDDHHmmss')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [batchResult]);
+  const handleDownloadResult = useCallback(() => {
+    const allOrders = getStoredOrders();
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: 调整成功 - 订单规则详情
+    const successRows = batchResult.success.map((orderNo) => {
+      const order = allOrders.find((o) => o.orderNo === orderNo);
+      const rule = order ? ruleVersions.find((rv) => rv.version === order.matchedRuleVersion) : null;
+      const r = rule?.rules || {};
+      return {
+        '订单号': orderNo,
+        '订单类型': order?.orderType || '',
+        '产品信息': order?.product || '',
+        '买家姓名': order?.buyer || '',
+        '订单金额': order?.amount || 0,
+        '原规则版本': '',
+        '新规则版本': batchTargetRule || '',
+        '业务收入1比例': r.business1Ratio != null ? `${(r.business1Ratio * 100).toFixed(0)}%` : '',
+        '业务收入1团队': r.business1Team || '',
+        '业务收入2比例': r.business2Ratio != null ? `${(r.business2Ratio * 100).toFixed(0)}%` : '',
+        '业务收入2团队': r.business2Team || '',
+        '导流收入比例': r.trafficRatio != null ? `${(r.trafficRatio * 100).toFixed(0)}%` : '',
+        '导流收入团队': r.trafficTeam || '',
+        '渠道分成比例': r.channelRatio != null ? `${(r.channelRatio * 100).toFixed(0)}%` : '',
+        '渠道分成团队': r.channelTeam || '',
+        '交付收入比例': r.deliveryRatio != null ? `${(r.deliveryRatio * 100).toFixed(0)}%` : '',
+        '交付收入团队': r.deliveryTeam || '',
+      };
+    });
+    const ws1 = XLSX.utils.json_to_sheet(successRows);
+    ws1['!cols'] = [
+      { wch: 18 }, { wch: 10 }, { wch: 20 }, { wch: 10 }, { wch: 10 },
+      { wch: 12 }, { wch: 12 },
+      { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 16 },
+      { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 16 },
+      { wch: 14 }, { wch: 16 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws1, '调整成功');
+
+    // Sheet 2: 调整失败
+    const failedRows = batchResult.failed.map((f) => ({
+      '订单号': f.orderNo,
+      '原规则版本': f.oldVersion || '',
+      '目标规则版本': f.newVersion || '',
+      '失败原因': f.reason || '',
+    }));
+    const ws2 = XLSX.utils.json_to_sheet(failedRows);
+    ws2['!cols'] = [{ wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 50 }];
+    XLSX.utils.book_append_sheet(wb, ws2, '调整失败');
+
+    XLSX.writeFile(wb, `批量调整结果_${dayjs().format('YYYYMMDDHHmmss')}.xlsx`);
+  }, [batchResult, batchTargetRule]);
 
   const handleAdjust = useCallback((type) => {
     setAdjustType(type);
@@ -504,6 +591,11 @@ export default function App() {
             { title: <span style={{ color: '#1890ff' }}>{currentBreadcrumb.label}</span> },
           ]} />
           <div className="top-bar-right">
+            {demoMode && (
+              <Tooltip title="文档中心">
+                <Button type="text" icon={<FileTextOutlined />} onClick={() => window.open(`${import.meta.env.BASE_URL}doc-center.html`, '_blank')} />
+              </Tooltip>
+            )}
             <Tooltip title="刷新"><Button type="text" icon={<ReloadOutlined />} /></Tooltip>
             <Tooltip title="全屏"><Button type="text" icon={<DashboardOutlined />} /></Tooltip>
             <div className="top-bar-avatar">U</div>
@@ -529,19 +621,19 @@ export default function App() {
                   <Col span={3}>
                     <Select placeholder="所属团队" style={{ width: '100%' }} value={filters.team || undefined}
                       onChange={(v) => setFilters({ ...filters, team: v })} allowClear
-                      options={[{ value: '全部', label: '全部' }, { value: '特训营业务组', label: '特训营业务组' }, { value: '导流运营组', label: '导流运营组' }, { value: '交付服务组', label: '交付服务组' }, { value: '渠道合作组', label: '渠道合作组' }]}
+                      options={[{ value: '全部', label: '全部' }, { value: '赫柏队', label: '赫柏队' }, { value: '大客户经理二组', label: '大客户经理二组' }, { value: '上海教务一部', label: '上海教务一部' }, { value: '杭州教务一部', label: '杭州教务一部' }, { value: '苏州教务一部', label: '苏州教务一部' }, { value: '杭州教务二部', label: '杭州教务二部' }]}
                     />
                   </Col>
                   <Col span={3}>
                     <Select placeholder="团队区域" style={{ width: '100%' }} value={filters.teamRegion || undefined}
                       onChange={(v) => setFilters({ ...filters, teamRegion: v })} allowClear
-                      options={[{ value: '全部', label: '全部' }, { value: '华东区', label: '华东区' }, { value: '华北区', label: '华北区' }, { value: '华南区', label: '华南区' }]}
+                      options={[{ value: '全部', label: '全部' }, { value: '博商深圳', label: '博商深圳' }, { value: '博商上海', label: '博商上海' }, { value: '博商杭州', label: '博商杭州' }, { value: '博商苏州', label: '博商苏州' }]}
                     />
                   </Col>
                   <Col span={4}>
                     <Select placeholder="产品类型" style={{ width: '100%' }} value={filters.productType || undefined}
                       onChange={(v) => setFilters({ ...filters, productType: v })} allowClear
-                      options={[{ value: '全部', label: '全部' }, { value: '课程', label: '课程' }, { value: '活动', label: '活动' }, { value: '会员', label: '会员' }]}
+                      options={[{ value: '全部', label: '全部' }, { value: '咨询', label: '咨询' }, { value: '定制咨询', label: '定制咨询' }]}
                     />
                   </Col>
                   <Col span={3}>
@@ -576,7 +668,7 @@ export default function App() {
                     <Col span={3}>
                       <Select placeholder="所属部门" style={{ width: '100%' }} value={filters.department || undefined}
                         onChange={(v) => setFilters({ ...filters, department: v })} allowClear
-                        options={[{ value: '全部', label: '全部' }, { value: '教育培训部', label: '教育培训部' }, { value: '市场部', label: '市场部' }, { value: '会员运营部', label: '会员运营部' }]}
+                        options={[{ value: '全部', label: '全部' }, { value: '深圳教务', label: '深圳教务' }, { value: '全域线下', label: '全域线下' }, { value: '上海教务部', label: '上海教务部' }, { value: '杭州教务', label: '杭州教务' }, { value: '苏州教务', label: '苏州教务' }]}
                       />
                     </Col>
                     <Col span={7}>
@@ -943,88 +1035,197 @@ export default function App() {
 
               {/* Filter Area */}
               <Card className="filter-card" size="small">
-                {oaFilterExpanded && (
-                  <Row gutter={[8, 8]} align="middle" style={{ marginBottom: 8 }}>
-                    <Col span={4}>
-                      <Input placeholder="买家姓名" value={oaFilters.buyer}
-                        onChange={(e) => setOaFilters({ ...oaFilters, buyer: e.target.value })} allowClear
+                {/* Row 1: 订单搜索 + 所属团队 + 团队所属区域 */}
+                <Row gutter={[24, 12]} align="middle" style={{ marginBottom: 12 }}>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">订单搜索</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 100 }} value={oaFilters.orderSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, orderSearchType: v })}
+                          options={[
+                            { value: 'orderNo', label: '订单号' },
+                            { value: 'orderType', label: '订单类型' },
+                          ]}
+                        />
+                        <Input style={{ flex: 1, minWidth: 120 }} placeholder="请输入" value={oaFilters.orderSearchValue}
+                          onChange={(e) => setOaFilters({ ...oaFilters, orderSearchValue: e.target.value })} allowClear
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">所属团队</span>
+                      <Select style={{ flex: 1, minWidth: 120 }} placeholder="请选择" value={oaFilters.team || undefined}
+                        onChange={(v) => setOaFilters({ ...oaFilters, team: v })} allowClear
+                        options={[...new Set(orders.map(o => o.team))].filter(Boolean).map(v => ({ value: v, label: v }))}
                       />
-                    </Col>
-                    <Col span={5}>
-                      <Input placeholder="产品信息" value={oaFilters.product}
-                        onChange={(e) => setOaFilters({ ...oaFilters, product: e.target.value })} allowClear
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">团队所属区域</span>
+                      <Select style={{ flex: 1, minWidth: 120 }} placeholder="全部" value={oaFilters.teamRegion || undefined}
+                        onChange={(v) => setOaFilters({ ...oaFilters, teamRegion: v })} allowClear
+                        options={[...new Set(orders.map(o => o.teamRegion))].filter(Boolean).map(v => ({ value: v, label: v }))}
                       />
-                    </Col>
-                    <Col span={3}>
-                      <Select placeholder="产品类型" style={{ width: '100%' }} value={oaFilters.productType || undefined}
+                    </div>
+                  </Col>
+                </Row>
+
+                {/* Row 2: 产品类型 + 所属部门 + 员工搜索 */}
+                <Row gutter={[24, 12]} align="middle" style={{ marginBottom: 12 }}>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">产品类型</span>
+                      <Select style={{ flex: 1, minWidth: 120 }} placeholder="全部" value={oaFilters.productType || undefined}
                         onChange={(v) => setOaFilters({ ...oaFilters, productType: v })} allowClear
-                        options={[...new Set(orders.map(o => o.productType))].map(v => ({ value: v, label: v }))}
+                        options={[...new Set(orders.map(o => o.productType))].filter(Boolean).map(v => ({ value: v, label: v }))}
                       />
-                    </Col>
-                    <Col span={3}>
-                      <Select placeholder="客户来源" style={{ width: '100%' }} value={oaFilters.buyerSource || undefined}
-                        onChange={(v) => setOaFilters({ ...oaFilters, buyerSource: v })} allowClear
-                        options={[...new Set(orders.map(o => o.buyerSource))].map(v => ({ value: v, label: v }))}
-                      />
-                    </Col>
-                    <Col span={4}>
-                      <Input placeholder="规则名称" value={oaFilters.ruleName}
-                        onChange={(e) => setOaFilters({ ...oaFilters, ruleName: e.target.value })} allowClear
-                      />
-                    </Col>
-                    <Col span={3}>
-                      <Select placeholder="规则编码" style={{ width: '100%' }} value={oaFilters.ruleId || undefined}
-                        onChange={(v) => setOaFilters({ ...oaFilters, ruleId: v })} allowClear
-                        options={[...new Set(ruleVersions.map(r => r.id))].map(v => ({ value: v, label: v }))}
-                      />
-                    </Col>
-                    <Col span={3}>
-                      <Select placeholder="规则版本" style={{ width: '100%' }} value={oaFilters.ruleVersion || undefined}
-                        onChange={(v) => setOaFilters({ ...oaFilters, ruleVersion: v })} allowClear
-                        options={[...new Set(ruleVersions.map(r => r.version))].map(v => ({ value: v, label: v }))}
-                      />
-                    </Col>
-                  </Row>
-                )}
-                <Row gutter={[8, 8]} align="middle">
-                  <Col span={4}>
-                    <Input
-                      placeholder="订单号" prefix={<SearchOutlined />}
-                      value={oaFilters.orderNo}
-                      onChange={(e) => setOaFilters({ ...oaFilters, orderNo: e.target.value })}
-                      allowClear
-                    />
+                    </div>
                   </Col>
-                  <Col span={3}>
-                    <Select placeholder="订单类型" style={{ width: '100%' }} value={oaFilters.orderType || undefined}
-                      onChange={(v) => setOaFilters({ ...oaFilters, orderType: v })} allowClear
-                      options={[...new Set(orders.map(o => o.orderType))].map(v => ({ value: v, label: v }))}
-                    />
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">所属部门</span>
+                      <Select style={{ flex: 1, minWidth: 120 }} placeholder="全部" value={oaFilters.department || undefined}
+                        onChange={(v) => setOaFilters({ ...oaFilters, department: v })} allowClear
+                        options={[...new Set(orders.map(o => o.department))].filter(Boolean).map(v => ({ value: v, label: v }))}
+                      />
+                    </div>
                   </Col>
-                  <Col span={3}>
-                    <Select placeholder="订单状态" style={{ width: '100%' }} value={oaFilters.status || undefined}
-                      onChange={(v) => setOaFilters({ ...oaFilters, status: v })} allowClear
-                      options={[...new Set(orders.map(o => o.status))].map(v => ({ value: v, label: v }))}
-                    />
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">员工搜索</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 100 }} value={oaFilters.employeeSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, employeeSearchType: v })}
+                          options={[
+                            { value: 'employeeName', label: '员工姓名' },
+                            { value: 'employeeNo', label: '员工编号' },
+                          ]}
+                        />
+                        <Input style={{ flex: 1, minWidth: 120 }} placeholder="请输入" value={oaFilters.employeeSearchValue}
+                          onChange={(e) => setOaFilters({ ...oaFilters, employeeSearchValue: e.target.value })} allowClear
+                        />
+                      </div>
+                    </div>
                   </Col>
-                  <Col span={7}>
-                    <RangePicker
-                      style={{ width: '100%' }}
-                      value={oaFilters.dateRange}
-                      onChange={(v) => setOaFilters({ ...oaFilters, dateRange: v })}
-                      placeholder={['开始时间', '结束时间']}
-                    />
+                </Row>
+
+                {oaFilterExpanded && (<>
+                {/* Row 3: 买家信息 + 活动类型 + 产品搜索 */}
+                <Row gutter={[24, 12]} align="middle" style={{ marginBottom: 12 }}>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">买家信息</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 100 }} value={oaFilters.buyerSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, buyerSearchType: v })}
+                          options={[
+                            { value: 'buyerName', label: '姓名' },
+                            { value: 'buyerNo', label: '编号' },
+                          ]}
+                        />
+                        <Input style={{ flex: 1, minWidth: 120 }} placeholder="请输入" value={oaFilters.buyerSearchValue}
+                          onChange={(e) => setOaFilters({ ...oaFilters, buyerSearchValue: e.target.value })} allowClear
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">活动类型</span>
+                      <Select style={{ flex: 1, minWidth: 120 }} placeholder="全部" value={oaFilters.activityType || undefined}
+                        onChange={(v) => setOaFilters({ ...oaFilters, activityType: v })} allowClear
+                        options={[...new Set(orders.map(o => o.activityType))].filter(Boolean).map(v => ({ value: v, label: v }))}
+                      />
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">产品搜索</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 100 }} value={oaFilters.productSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, productSearchType: v })}
+                          options={[
+                            { value: 'productName', label: '产品名称' },
+                            { value: 'productNo', label: '产品编号' },
+                          ]}
+                        />
+                        <Input style={{ flex: 1, minWidth: 120 }} placeholder="请输入" value={oaFilters.productSearchValue}
+                          onChange={(e) => setOaFilters({ ...oaFilters, productSearchValue: e.target.value })} allowClear
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+
+                {/* Row 4: 时间搜索 + 按钮 */}
+                <Row gutter={[24, 12]} align="middle">
+                  <Col span={14}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">时间搜索</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 130 }} value={oaFilters.dateSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, dateSearchType: v })}
+                          options={[
+                            { value: 'createTime', label: '下单时间' },
+                            { value: 'payTime', label: '支付完成时间' },
+                          ]}
+                        />
+                        <RangePicker
+                          value={oaFilters.dateRange}
+                          onChange={(v) => setOaFilters({ ...oaFilters, dateRange: v })}
+                          placeholder={['开始日期', '结束日期']}
+                        />
+                      </div>
+                    </div>
                   </Col>
                   <Col>
-                    <Space size={4}>
-                      <Button type="primary" icon={<SearchOutlined />}>查询</Button>
-                      <Button icon={<ReloadOutlined />} onClick={handleResetOaFilters}>重置</Button>
-                      <Button type="link" onClick={() => setOaFilterExpanded(!oaFilterExpanded)}>
-                        {oaFilterExpanded ? '收起' : '展开'} {oaFilterExpanded ? <UpOutlined /> : <DownOutlined />}
+                    <Space size={8}>
+                      <Button type="primary" icon={<SearchOutlined />}>筛选</Button>
+                      <Button onClick={handleResetOaFilters}>重置</Button>
+                      <Button type="link" onClick={() => setOaFilterExpanded(false)}>
+                        收起 <UpOutlined />
                       </Button>
                     </Space>
                   </Col>
                 </Row>
+                </>)}
+
+                {!oaFilterExpanded && (
+                <Row gutter={[24, 12]} align="middle">
+                  <Col span={14}>
+                    <div className="oa-filter-item">
+                      <span className="oa-filter-label">时间搜索</span>
+                      <div className="oa-filter-controls">
+                        <Select style={{ width: 130 }} value={oaFilters.dateSearchType}
+                          onChange={(v) => setOaFilters({ ...oaFilters, dateSearchType: v })}
+                          options={[
+                            { value: 'createTime', label: '下单时间' },
+                            { value: 'payTime', label: '支付完成时间' },
+                          ]}
+                        />
+                        <RangePicker
+                          value={oaFilters.dateRange}
+                          onChange={(v) => setOaFilters({ ...oaFilters, dateRange: v })}
+                          placeholder={['开始日期', '结束日期']}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col>
+                    <Space size={8}>
+                      <Button type="primary" icon={<SearchOutlined />}>筛选</Button>
+                      <Button onClick={handleResetOaFilters}>重置</Button>
+                      <Button type="link" onClick={() => setOaFilterExpanded(true)}>
+                        展开 <DownOutlined />
+                      </Button>
+                    </Space>
+                  </Col>
+                </Row>
+                )}
               </Card>
 
               {/* Order Table */}
@@ -1185,18 +1386,18 @@ export default function App() {
           >
             <div style={{ background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4, padding: '8px 10px', marginBottom: 10, fontSize: 13 }}>
               <b>调整完成！</b> 成功 <b style={{ color: '#52c41a' }}>{batchResult.success.length}</b> 条，失败 <b style={{ color: '#ff4d4f' }}>{batchResult.failed.length}</b> 条
+              <Button
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadResult}
+                style={{ marginLeft: 12 }}
+              >
+                下载结果
+              </Button>
             </div>
-            {batchResult.failed.length > 0 && (
-              <div style={{ background: '#fff2e8', border: '1px solid #ffd591', borderRadius: 4, padding: '8px 10px', marginBottom: 12, fontSize: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>部分订单调整失败：</span>
-                  <a onClick={handleDownloadFailedFile} style={{ color: '#1890ff', cursor: 'pointer' }}>
-                    <DownloadOutlined /> 下载失败文件
-                  </a>
-                </div>
-                <div style={{ marginTop: 4, color: '#999', fontSize: 11 }}>文件包含：订单号、原规则版本、目标规则版本、失败原因</div>
-              </div>
-            )}
+            <div style={{ color: '#999', fontSize: 11, marginBottom: 12 }}>
+              下载 Excel 包含两个页签：「调整成功」含订单规则详情（比例、归属团队），「调整失败」含订单号和失败原因
+            </div>
             <Table
               dataSource={[
                 ...batchResult.success.map((no) => ({ orderNo: no, result: 'success', desc: '' })),
@@ -1220,7 +1421,7 @@ export default function App() {
           </Modal>
 
           {selectedMenu === 'order-detail' && selectedOrderId && (
-            <OrderDetailPage orderId={selectedOrderId} onBack={handleBackFromDetail} />
+            <OrderDetailPage orderId={selectedOrderId} onBack={handleBackFromDetail} onGoToAdjustment={handleGoToAdjustment} />
           )}
 
           {/* ====== Adjustment Page ====== */}
@@ -1231,8 +1432,13 @@ export default function App() {
           {/* ====== Demo Admin ====== */}
           {selectedMenu === 'demo-admin' && <DemoAdminPage onNavigate={setSelectedMenu} />}
 
+          {/* ====== Adjustment Form ====== */}
+          {selectedMenu === 'adjustment-form' && (
+            <AdjustmentFormPage initialOrderNo={adjustmentOrderNo} onBack={handleBackFromAdjustment} />
+          )}
+
           {/* ====== Placeholder for other menus ====== */}
-          {!['revenue', 'order-accounting', 'order-detail', 'adjustment', 'demo-admin'].includes(selectedMenu) && (
+          {!['revenue', 'order-accounting', 'order-detail', 'adjustment', 'adjustment-form', 'demo-admin'].includes(selectedMenu) && (
             <div className="empty-state" style={{ paddingTop: 100 }}>
               <ExclamationCircleOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
               <p style={{ fontSize: 16, color: '#8c8c8c', marginTop: 16 }}>{currentBreadcrumb.label} - 功能开发中</p>

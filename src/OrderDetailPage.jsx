@@ -1,8 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
 import {
   Card, Descriptions, Table, Tabs, Button, Tag, Space, Timeline,
-  Modal, Form, Select, InputNumber, DatePicker, Input, Divider,
-  Row, Col, message,
+  Modal, Form, Select, Input, Divider,
+  message,
 } from 'antd';
 import {
   ArrowLeftOutlined, SwapOutlined, EditOutlined,
@@ -11,7 +11,7 @@ import {
   UndoOutlined,
 } from '@ant-design/icons';
 import {
-  ruleVersions, ruleSnapshots, payments, deliveries,
+  ruleVersions, ruleSnapshots,
   calculateRevenueBreakdown, calculateRevenueFlows, addAdjustment, updateOrder,
   getStoredOrders, getStoredAdjustments, resetStorage,
 } from './mockData';
@@ -42,11 +42,12 @@ function Money({ value, color, bold }) {
   );
 }
 
-export default function OrderDetailPage({ orderId, onBack }) {
+export default function OrderDetailPage({ orderId, onBack, onGoToAdjustment }) {
   const [detailTab, setDetailTab] = useState('revenue-detail');
   const [adjustModalVisible, setAdjustModalVisible] = useState(false);
-  const [adjustType, setAdjustType] = useState('rule');
   const [adjustForm] = Form.useForm();
+  const selectedTargetVersion = Form.useWatch('targetVersion', adjustForm);
+  const selectedTargetRule = selectedTargetVersion ? ruleVersions.find((rv) => rv.version === selectedTargetVersion) : null;
   const [messageApi, contextHolder] = message.useMessage();
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -62,10 +63,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
     const revenueBreakdown = calculateRevenueBreakdown(order, orderAdjustments);
     const revenueFlows = calculateRevenueFlows(order, orderAdjustments);
 
-    const orderPayments = payments.filter((p) => p.orderNo === order.orderNo);
-    const orderDeliveries = deliveries.filter((d) => d.orderNo === order.orderNo);
-
-    return { order, orderPayments, orderDeliveries, snapshot, matchedRule, orderAdjustments, revenueBreakdown, revenueFlows };
+    return { order, snapshot, matchedRule, orderAdjustments, revenueBreakdown, revenueFlows };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, refreshKey]);
 
@@ -80,51 +78,44 @@ export default function OrderDetailPage({ orderId, onBack }) {
     messageApi.success('数据已重置为初始状态');
   }, [messageApi]);
 
-  const handleAdjust = useCallback((type) => {
-    setAdjustType(type);
+  const handleOpenRuleAdjust = useCallback(() => {
     adjustForm.resetFields();
     setAdjustModalVisible(true);
   }, [adjustForm]);
 
   const handleAdjustSubmit = useCallback(() => {
     adjustForm.validateFields().then((values) => {
-      if (adjustType === 'revenue') {
-        addAdjustment({
-          orderNo: orderId,
-          type: '收入调整',
-          reason: values.reason,
-          details: {
-            adjustCategory: values.adjustCategory,
-            adjustAmount: values.adjustAmount,
-            revenueType: values.revenueType,
-          },
-          operator: '当前用户',
-        });
-      } else {
-        const targetRule = ruleVersions.find((rv) => rv.version === values.targetVersion);
-        if (targetRule) {
-          updateOrder(orderId, {
-            matchedRuleVersion: values.targetVersion,
-            matchedRuleId: targetRule.id,
-          });
-          addAdjustment({
-            orderNo: orderId,
-            type: '规则调整',
-            reason: values.reason,
-            details: {
-              targetVersion: values.targetVersion,
-              effectiveTime: values.effectiveTime?.format('YYYY-MM-DD HH:mm:ss'),
-            },
-            operator: '当前用户',
-          });
-        }
+      const targetRule = ruleVersions.find((rv) => rv.version === values.targetVersion);
+      if (!targetRule) return;
+
+      const r = targetRule.rules;
+      const totalRatio = (r.business1Ratio || 0) + (r.business2Ratio || 0)
+        + (r.trafficRatio || 0) + (r.channelRatio || 0) + (r.deliveryRatio || 0);
+      if (Math.abs(totalRatio - 1) > 0.0001) {
+        const delta = Math.round((totalRatio - 1) * 100);
+        messageApi.warning(delta > 0
+          ? `规则比例合计超过 ${delta}%，请调整到 100% 后再提交`
+          : `规则比例合计还差 ${Math.abs(delta)}%，请调整到 100% 后再提交`);
+        return;
       }
+
+      updateOrder(orderId, {
+        matchedRuleVersion: values.targetVersion,
+        matchedRuleId: targetRule.id,
+      });
+      addAdjustment({
+        orderNo: orderId,
+        type: '规则调整',
+        reason: values.reason,
+        details: { targetVersion: values.targetVersion },
+        operator: '当前用户',
+      });
       setRefreshKey((k) => k + 1);
-      messageApi.success(`${adjustType === 'rule' ? '规则调整' : '收入调整'}已提交，数据已更新`);
+      messageApi.success('规则调整已提交，数据已更新');
       setAdjustModalVisible(false);
       adjustForm.resetFields();
     });
-  }, [adjustType, adjustForm, orderId, messageApi]);
+  }, [adjustForm, orderId, messageApi]);
 
   if (!detail) {
     return (
@@ -136,7 +127,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
     );
   }
 
-  const { order, orderPayments, orderDeliveries, snapshot, matchedRule, orderAdjustments, revenueBreakdown, revenueFlows } = detail;
+  const { order, snapshot, matchedRule, orderAdjustments, revenueBreakdown, revenueFlows } = detail;
   const isActivity = order.orderType === '活动门票';
   const isPartnerDelivery = order.orderType === '合作方交付';
   const confirmationRate = revenueBreakdown.totalToConfirm > 0
@@ -166,10 +157,8 @@ export default function OrderDetailPage({ orderId, onBack }) {
           </div>
         </div>
         <Space className="od-action-group" wrap>
-          <Button type="primary" icon={<EditOutlined />} onClick={() => handleAdjust('revenue')}>收入调整</Button>
-          <Button icon={<SwapOutlined />} onClick={() => handleAdjust('rule')}>规则调整</Button>
-          <Button icon={<ReloadOutlined />} onClick={handleRefresh}>刷新</Button>
-          <Button icon={<UndoOutlined />} onClick={handleReset} danger>重置数据</Button>
+          <Button type="primary" icon={<EditOutlined />} onClick={() => onGoToAdjustment(orderId)}>收入调整</Button>
+          <Button icon={<SwapOutlined />} onClick={handleOpenRuleAdjust}>规则调整</Button>
         </Space>
       </div>
 
@@ -243,8 +232,8 @@ export default function OrderDetailPage({ orderId, onBack }) {
           <div className="od-left-section">
             <div className="od-left-section-title">匹配规则</div>
             <div className="od-left-info-grid">
-              <div className="od-info-row"><span className="od-info-label">规则版本</span><span className="od-info-value"><Tag color="blue">{order.matchedRuleVersion}</Tag></span></div>
-              <div className="od-info-row"><span className="od-info-label">规则名称</span><span className="od-info-value">{matchedRule?.name || '-'}</span></div>
+              <div className="od-info-row"><span className="od-info-label">规则版本</span><span className="od-info-value">{matchedRule ? <Tag color="blue">{order.matchedRuleVersion}</Tag> : <Tag color="red">未匹配</Tag>}</span></div>
+              <div className="od-info-row"><span className="od-info-label">规则名称</span><span className="od-info-value">{matchedRule?.name || <span style={{ color: '#ff4d4f' }}>未匹配规则</span>}</span></div>
             </div>
           </div>
         </div>
@@ -253,6 +242,25 @@ export default function OrderDetailPage({ orderId, onBack }) {
         <div className="od-split-right">
           <IterationMark section="收入确认概览">
           {/* Revenue summary card */}
+          {!matchedRule ? (
+            <div className="od-stats-card" style={{ borderColor: '#ff4d4f' }}>
+              <div style={{ padding: '20px 24px', textAlign: 'center' }}>
+                <ExclamationCircleOutlined style={{ fontSize: 36, color: '#ff4d4f', marginBottom: 12 }} />
+                <div style={{ fontSize: 16, fontWeight: 600, color: '#ff4d4f', marginBottom: 8 }}>订单匹配规则异常</div>
+                <div style={{ color: '#666', marginBottom: 4 }}>当前订单未匹配到有效的收入分配规则，无法进行收入确认。</div>
+                <div style={{ color: '#999', fontSize: 12, marginBottom: 16 }}>订单金额：¥{order.amount.toLocaleString()} | 状态：{order.status}</div>
+                <div style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 6, padding: '10px 16px', display: 'inline-block', textAlign: 'left' }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4, color: '#d48806' }}>请及时补充规则</div>
+                  <div style={{ color: '#ad6800', fontSize: 12 }}>
+                    该订单尚未关联收入分配规则，收入类型比例和归属团队信息缺失。 请前往「规则管理 → 规则配置」创建匹配规则，并通过「规则调整」为此订单指定规则版本。
+                  </div>
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <Button type="primary" icon={<SwapOutlined />} onClick={handleOpenRuleAdjust}>指定规则</Button>
+                </div>
+              </div>
+            </div>
+          ) : (
           <div className="od-stats-card">
             <div className="od-stats-head">
               <div>
@@ -317,6 +325,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
               ))}
             </div>
           </div>
+          )}
           </IterationMark>
 
           {/* Main tabs */}
@@ -331,7 +340,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
                   size="small"
                   pagination={false}
                   bordered
-                  scroll={{ x: 1100 }}
+                  scroll={{ x: 1500 }}
                   columns={[
                     {
                       title: '时间', dataIndex: 'time', key: 'time', width: 130, fixed: 'left',
@@ -343,7 +352,7 @@ export default function OrderDetailPage({ orderId, onBack }) {
                       title: '操作子类型', dataIndex: 'operationSubType', key: 'operationSubType', width: 130,
                     },
                     {
-                      title: '收入类型', dataIndex: 'revenueType', key: 'revenueType', width: 80,
+                      title: '收入类型', dataIndex: 'revenueType', key: 'revenueType', width: 100,
                       render: (v) => <Tag color={revenueTypeColorMap[v]}>{v}</Tag>,
                     },
                     {
@@ -378,6 +387,22 @@ export default function OrderDetailPage({ orderId, onBack }) {
                     },
                     {
                       title: '售后单号', dataIndex: 'afterSaleNo', key: 'afterSaleNo', width: 120,
+                      render: (v) => v || '-',
+                    },
+                    {
+                      title: '状态', dataIndex: 'status', key: 'status', width: 80, align: 'center',
+                      render: (v) => <Tag color={v === '已确认' ? 'green' : v === '异常' ? 'red' : 'blue'}>{v}</Tag>,
+                    },
+                    {
+                      title: '冲抵状态', dataIndex: 'offsetStatus', key: 'offsetStatus', width: 100, align: 'center',
+                      render: (v) => v === '冲抵' ? <Tag color="orange">{v}</Tag> : v === '已被冲抵' ? <Tag color="volcano">{v}</Tag> : <span style={{ color: '#ccc' }}>--</span>,
+                    },
+                    {
+                      title: '备注', dataIndex: 'remark', key: 'remark', width: 120, ellipsis: true,
+                      render: (v) => v || '-',
+                    },
+                    {
+                      title: '交付备注', dataIndex: 'deliveryRemark', key: 'deliveryRemark', width: 120, ellipsis: true,
                       render: (v) => v || '-',
                     },
                   ]}
@@ -444,50 +469,6 @@ export default function OrderDetailPage({ orderId, onBack }) {
                 </IterationMark>
               </TabPane>
 
-              <TabPane tab={<span><CheckCircleOutlined /> 支付/交付记录</span>} key="payment">
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Card title="支付记录" size="small" className="sub-card">
-                      {orderPayments.length > 0 ? (
-                        <Table
-                          dataSource={orderPayments}
-                          rowKey="id"
-                          size="small"
-                          pagination={false}
-                          bordered
-                          columns={[
-                            { title: '支付单号', dataIndex: 'id', key: 'id', width: 90 },
-                            { title: '支付方式', dataIndex: 'payMethod', key: 'payMethod', width: 90 },
-                            { title: '支付金额', dataIndex: 'amount', key: 'amount', width: 100, align: 'right', render: (v) => `¥${v.toLocaleString()}` },
-                            { title: '支付时间', dataIndex: 'payTime', key: 'payTime' },
-                            { title: '状态', dataIndex: 'status', key: 'status', width: 80, align: 'center', render: (v) => <Tag color="green">{v}</Tag> },
-                          ]}
-                        />
-                      ) : <div className="empty-text">暂无支付记录</div>}
-                    </Card>
-                  </Col>
-                  <Col span={12}>
-                    <Card title="交付记录" size="small" className="sub-card">
-                      {orderDeliveries.length > 0 ? (
-                        <Table
-                          dataSource={orderDeliveries}
-                          rowKey="id"
-                          size="small"
-                          pagination={false}
-                          bordered
-                          columns={[
-                            { title: '交付单号', dataIndex: 'id', key: 'id', width: 90 },
-                            { title: '交付内容', dataIndex: 'content', key: 'content' },
-                            { title: '交付时间', dataIndex: 'deliveryTime', key: 'deliveryTime' },
-                            { title: '状态', dataIndex: 'status', key: 'status', width: 80, align: 'center', render: (v) => <Tag color="green">{v}</Tag> },
-                          ]}
-                        />
-                      ) : <div className="empty-text">暂无交付记录</div>}
-                    </Card>
-                  </Col>
-                </Row>
-              </TabPane>
-
               <TabPane tab={<span><SwapOutlined /> 调整记录 {orderAdjustments.length > 0 && <Tag color="orange" style={{ marginLeft: 4 }}>{orderAdjustments.length}</Tag>}</span>} key="adjustment">
                 {orderAdjustments.length > 0 ? (
                   <Table
@@ -518,14 +499,9 @@ export default function OrderDetailPage({ orderId, onBack }) {
                   <div className="empty-state">
                     <ExclamationCircleOutlined style={{ fontSize: 32, color: '#d9d9d9' }} />
                     <p>暂无调整记录</p>
-                    <Space>
-                      <Button type="primary" size="small" icon={<SwapOutlined />} onClick={() => handleAdjust('rule')}>
-                        规则调整
-                      </Button>
-                      <Button size="small" icon={<EditOutlined />} onClick={() => handleAdjust('revenue')}>
-                        收入调整
-                      </Button>
-                    </Space>
+                    <Button type="primary" size="small" icon={<SwapOutlined />} onClick={handleOpenRuleAdjust}>
+                      规则调整
+                    </Button>
                   </div>
                 )}
               </TabPane>
@@ -537,67 +513,54 @@ export default function OrderDetailPage({ orderId, onBack }) {
 
       {/* ====== Adjust Modal ====== */}
       <Modal
-        title={adjustType === 'rule' ? '规则调整' : '收入调整'}
+        title="规则调整"
         open={adjustModalVisible}
         onOk={handleAdjustSubmit}
         onCancel={() => { setAdjustModalVisible(false); adjustForm.resetFields(); }}
         okText="提交"
         cancelText="取消"
-        width={560}
+        width={640}
       >
         <div style={{ marginBottom: 16, padding: '10px 14px', background: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 6, fontSize: 13 }}>
           <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: 6 }} />
-          {adjustType === 'rule'
-            ? '规则调整将立即更新当前订单的收入分配比例，已确认的历史收入不受影响。'
-            : '收入调整将直接影响订单的已确认收入金额。'}
+          规则调整将立即更新当前订单的收入分配比例，已确认的历史收入不受影响。
         </div>
         <Form form={adjustForm} layout="vertical" size="middle">
           <Form.Item label="当前订单">{orderId}</Form.Item>
-          {adjustType === 'rule' ? (
-            <>
-              <Form.Item label="目标规则版本" name="targetVersion" rules={[{ required: true, message: '请选择目标规则版本' }]}>
-                <Select placeholder="请选择规则版本">
-                  {ruleVersions.map((rv) => (
-                    <Select.Option key={rv.id} value={rv.version}>
-                      <Space>
-                        <Tag color="blue">{rv.version}</Tag>
-                        <span>{rv.name}</span>
-                        <Tag color={rv.status === '生效中' ? 'green' : 'default'}>{rv.status}</Tag>
-                      </Space>
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item label="生效时间" name="effectiveTime" rules={[{ required: true, message: '请选择生效时间' }]}>
-                <DatePicker showTime style={{ width: '100%' }} placeholder="选择生效时间" />
-              </Form.Item>
-            </>
-          ) : (
-            <>
-              <Form.Item label="调整类型" name="adjustCategory" rules={[{ required: true, message: '请选择调整类型' }]}>
-                <Select placeholder="请选择调整类型">
-                  <Select.Option value="increase">调增</Select.Option>
-                  <Select.Option value="decrease">调减</Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="调整金额" name="adjustAmount" rules={[{ required: true, message: '请输入调整金额' }]}>
-                <InputNumber style={{ width: '100%' }} min={0} precision={2} prefix="¥" placeholder="请输入调整金额" />
-              </Form.Item>
-              <Form.Item label="收入类型" name="revenueType" rules={[{ required: true, message: '请选择收入类型' }]}>
-                <Select placeholder="请选择收入类型">
-                  <Select.Option value="业务收入1">业务收入1</Select.Option>
-                  <Select.Option value="业务收入2">业务收入2</Select.Option>
-                  <Select.Option value="导流收入">导流收入</Select.Option>
-                  <Select.Option value="业务渠道分成">业务渠道分成</Select.Option>
-                  <Select.Option value="交付收入">交付收入</Select.Option>
-                </Select>
-              </Form.Item>
-            </>
-          )}
+          <Form.Item label="目标规则版本" name="targetVersion" rules={[{ required: true, message: '请选择目标规则版本' }]}>
+            <Select placeholder="请选择规则版本">
+              {ruleVersions.map((rv) => (
+                <Select.Option key={rv.id} value={rv.version}>
+                  <Space>
+                    <Tag color="blue">{rv.version}</Tag>
+                    <span>{rv.name}</span>
+                    <Tag color={rv.status === '生效中' ? 'green' : 'default'}>{rv.status}</Tag>
+                  </Space>
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
           <Form.Item label="调整原因" name="reason" rules={[{ required: true, message: '请输入调整原因' }]}>
             <Input.TextArea rows={3} placeholder="请输入调整原因" />
           </Form.Item>
         </Form>
+        {selectedTargetRule && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>规则详情</div>
+            <Descriptions size="small" column={2} bordered>
+              <Descriptions.Item label="业务收入1比例">{(selectedTargetRule.rules.business1Ratio * 100).toFixed(0)}%</Descriptions.Item>
+              <Descriptions.Item label="业务收入1团队">{selectedTargetRule.rules.business1Team}</Descriptions.Item>
+              <Descriptions.Item label="业务收入2比例">{(selectedTargetRule.rules.business2Ratio * 100).toFixed(0)}%</Descriptions.Item>
+              <Descriptions.Item label="业务收入2团队">{selectedTargetRule.rules.business2Team}</Descriptions.Item>
+              <Descriptions.Item label="导流收入比例">{(selectedTargetRule.rules.trafficRatio * 100).toFixed(0)}%</Descriptions.Item>
+              <Descriptions.Item label="导流收入团队">{selectedTargetRule.rules.trafficTeam}</Descriptions.Item>
+              <Descriptions.Item label="交付收入比例">{(selectedTargetRule.rules.deliveryRatio * 100).toFixed(0)}%</Descriptions.Item>
+              <Descriptions.Item label="交付收入团队">{selectedTargetRule.rules.deliveryTeam}</Descriptions.Item>
+              <Descriptions.Item label="业务渠道分成比例">{(selectedTargetRule.rules.channelRatio * 100).toFixed(0)}%</Descriptions.Item>
+              <Descriptions.Item label="业务渠道分成团队">{selectedTargetRule.rules.channelTeam}</Descriptions.Item>
+            </Descriptions>
+          </div>
+        )}
       </Modal>
     </div>
   );

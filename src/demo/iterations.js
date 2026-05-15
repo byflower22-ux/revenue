@@ -45,6 +45,7 @@ export const iterations = {
     { key: '2.1', label: '2.1迭代', date: '04-23' },
     { key: '2.4', label: '2.4迭代', date: '04-24' },
     { key: '2.5', label: '2.5迭代', date: '04-25' },
+    { key: '2.6', label: '2.6迭代', date: '05-12' },
   ],
   docs: {
     'adjustment-order-rule': {

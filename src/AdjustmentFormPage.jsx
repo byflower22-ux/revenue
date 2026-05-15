@@ -54,10 +54,12 @@ const operationSubTypeOptions = [
 ];
 
 const teamOptions = [
-  { value: '特训营业务组', label: '特训营业务组' },
-  { value: '导流运营组', label: '导流运营组' },
-  { value: '交付服务组', label: '交付服务组' },
-  { value: '渠道合作组', label: '渠道合作组' },
+  { value: '赫柏队', label: '赫柏队' },
+  { value: '大客户经理二组', label: '大客户经理二组' },
+  { value: '上海教务一部', label: '上海教务一部' },
+  { value: '杭州教务一部', label: '杭州教务一部' },
+  { value: '苏州教务一部', label: '苏州教务一部' },
+  { value: '杭州教务二部', label: '杭州教务二部' },
   { value: '博商管理', label: '博商管理' },
 ];
 
@@ -79,7 +81,7 @@ const approverOptions = [
   { value: '财务主管', label: '财务主管' },
 ];
 
-export default function AdjustmentFormPage({ onBack }) {
+export default function AdjustmentFormPage({ onBack, initialOrderNo }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -93,6 +95,19 @@ export default function AdjustmentFormPage({ onBack }) {
   const [editedRuleItems, setEditedRuleItems] = useState(null);
   const [showAddRuleTypePicker, setShowAddRuleTypePicker] = useState(false);
   const [addRuleType, setAddRuleType] = useState('业务收入');
+
+  // Auto-select initial order on mount
+  useEffect(() => {
+    if (initialOrderNo) {
+      const allOrders = getStoredOrders();
+      const order = allOrders.find((o) => o.orderNo === initialOrderNo);
+      if (order) {
+        setSelectedOrders([order]);
+        setActiveOrderIndex(0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedAdjustItems = Form.useWatch('adjustmentItems', form) || [];
 

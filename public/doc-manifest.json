@@ -1,0 +1,82 @@
+{
+  "versions": [
+    {
+      "key": "2.5",
+      "label": "V2.5 迭代",
+      "date": "",
+      "docs": [
+        {
+          "title": "需求文档",
+          "file": "docs/需求文档-V2.5.md"
+        }
+      ],
+      "flows": [
+        {
+          "title": "DELIVERY 收入生成",
+          "file": "flows/DELIVERY 收入生成-V2.5.png"
+        },
+        {
+          "title": "ERP 成交方式变更收入处理",
+          "file": "flows/ERP 成交方式变更收入处理-V2.5.png"
+        },
+        {
+          "title": "PAYMENT 收入生成",
+          "file": "flows/PAYMENT 收入生成-V2.5.png"
+        },
+        {
+          "title": "收入生成校验",
+          "file": "flows/收入生成校验-V2.5.png"
+        },
+        {
+          "title": "订单收入调整",
+          "file": "flows/订单收入调整-V2.5.png"
+        },
+        {
+          "title": "订单规则初始化",
+          "file": "flows/订单规则初始化-V2.5.png"
+        },
+        {
+          "title": "订单规则批量更新",
+          "file": "flows/订单规则批量更新-V2.5.png"
+        },
+        {
+          "title": "订单退费",
+          "file": "flows/订单退费-V2.5.png"
+        }
+      ],
+      "cases": []
+    },
+    {
+      "key": "2.4",
+      "label": "V2.4 迭代",
+      "date": "",
+      "docs": [
+        {
+          "title": "需求文档",
+          "file": "docs/需求文档-V2.4.md"
+        }
+      ],
+      "flows": [],
+      "cases": [
+        {
+          "title": "经营分析版 月度报表确认（签字）&部分问题修复",
+          "thumbnail": "cases/经营分析V2.4版-月度报表确认（签字）&部分问题修复.png",
+          "download": "cases/经营分析V2.4版-月度报表确认（签字）&部分问题修复.xmind"
+        }
+      ]
+    },
+    {
+      "key": "2.3",
+      "label": "V2.3 迭代",
+      "date": "",
+      "docs": [
+        {
+          "title": "我是需求文档",
+          "file": "docs/我是需求文档-V2.3.md"
+        }
+      ],
+      "flows": [],
+      "cases": []
+    }
+  ]
+}
